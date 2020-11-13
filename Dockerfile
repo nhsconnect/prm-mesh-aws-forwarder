@@ -12,8 +12,4 @@ RUN \
 
 RUN cd s3-uploader/ && python3 setup.py install
 
-RUN touch /var/log/cron.log
-
-RUN (crontab -l ; echo "*/1 * * * * echo "Hello world" >> /var/log/cron.log") | crontab
-
-CMD ["/bin/bash", "cron && tail -f /var/log/cron.log"]
+CMD ["/bin/bash"]
