@@ -1,0 +1,3 @@
+[console_scripts]
+sync-mesh-to-s3 = gp2gp.synchronizer:main
+
