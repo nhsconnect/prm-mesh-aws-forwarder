@@ -12,4 +12,4 @@ RUN \
 
 RUN cd s3-uploader/ && python3 setup.py install
 
-CMD ["/bin/bash"]
+ENTRYPOINT sync-mesh-to-s3 --mesh-inbox $MESH_INBOX --s3-bucket $S3_BUCKET --state-file $STATE_FILE --s3-endpoint-url $S3_BUCKET_URL
