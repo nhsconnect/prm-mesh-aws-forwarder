@@ -19,8 +19,6 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks dojo-validate
-
-                          stages:
       - build:
           clean_workspace: true
           jobs:
