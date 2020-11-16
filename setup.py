@@ -8,7 +8,7 @@ setup(
     install_requires=["boto3~=1.16", "defusedxml~=0.6"],
     entry_points={
         "console_scripts": [
-            "sync-mesh-to-s3=gp2gp.synchronizer:main",
+            "sync-mesh-to-s3=gp2gp.main:main",
         ]
     },
 )

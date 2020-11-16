@@ -4,7 +4,8 @@ import string
 from datetime import datetime
 from os import getenv
 from pathlib import Path
-from subprocess import Popen, PIPE
+from subprocess import Popen
+from time import sleep
 
 import boto3
 from botocore.config import Config
@@ -35,7 +36,7 @@ def _start_minio(data_dir):
         "HOME": data_dir,
     }
 
-    return Popen(minio_command, env=minio_env, shell=True, stdout=PIPE, stderr=PIPE)
+    return Popen(minio_command, env=minio_env, shell=True, stdin=None, stdout=None, stderr=None)
 
 
 def _write_test_files(test_files):
@@ -91,7 +92,27 @@ def _run_synchronizer(mesh_inbox, bucket_name, state_file):
         --state-file {str(state_file)} \
         --s3-endpoint-url http://{MINIO_ADDRESS} \
     "
-    return Popen(pipeline_command, shell=True, env=pipeline_env, stdout=PIPE, stderr=PIPE)
+    return Popen(
+        pipeline_command, shell=True, env=pipeline_env, stdin=None, stdout=None, stderr=None
+    )
+
+
+def _wait_for_objects_to_exist(bucket, expected_key_names):
+    objects_match = _poll_until(
+        lambda: {obj.key for obj in bucket.objects.all()} == expected_key_names
+    )
+    assert objects_match
+
+
+def _poll_until(function, timeout=30, poll_freq=1):
+    elapsed_seconds = 0
+    started_time = datetime.now()
+    condition_reached = False
+    while elapsed_seconds <= timeout and not condition_reached:
+        condition_reached = function()
+        sleep(poll_freq)
+        elapsed_seconds = (datetime.now() - started_time).seconds
+    return condition_reached
 
 
 def test_mesh_s3_synchronizer(tmpdir):
@@ -122,21 +143,24 @@ def test_mesh_s3_synchronizer(tmpdir):
 
     try:
         pipeline_process = _run_synchronizer(mesh_inbox, bucket_name, state_file)
-        pipeline_process.wait(timeout=10)
-        expected_object_keys_a = {"2020/02/03/file_two.dat", "2020/02/04/file_three.dat"}
-        actual_object_keys_a = {obj.key for obj in s3_bucket.objects.all()}
-        assert actual_object_keys_a == expected_object_keys_a
+
+        _wait_for_objects_to_exist(
+            s3_bucket, {"2020/02/03/file_two.dat", "2020/02/04/file_three.dat"}
+        )
 
         _write_test_files([(mesh_file_four, datetime(2020, 4, 5, 2, 23, 56))])
-        pipeline_process = _run_synchronizer(mesh_inbox, bucket_name, state_file)
-        pipeline_process.wait(timeout=10)
-        expected_object_keys_b = {
-            "2020/02/03/file_two.dat",
-            "2020/02/04/file_three.dat",
-            "2020/04/05/file_four.dat",
-        }
-        actual_object_keys_b = {obj.key for obj in s3_bucket.objects.all()}
-        assert actual_object_keys_b == expected_object_keys_b
+
+        _wait_for_objects_to_exist(
+            s3_bucket,
+            {
+                "2020/02/03/file_two.dat",
+                "2020/02/04/file_three.dat",
+                "2020/04/05/file_four.dat",
+            },
+        )
+
+        pipeline_process.terminate()
+        pipeline_process.wait()
 
     finally:
         minio_process.terminate()

@@ -15,9 +15,11 @@ def test_uploads_file():
     mock_mesh_inbox_scanner.scan.return_value = [mock_mesh_file]
     mock_file_registry.is_already_processed.return_value = False
 
-    uploader = MeshToS3Synchronizer(mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader)
+    synchronizer = MeshToS3Synchronizer(
+        mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader
+    )
 
-    uploader.run()
+    synchronizer.synchronize()
 
     mock_file_uploader.upload.assert_called_once_with(mock_mesh_file)
 
@@ -33,9 +35,11 @@ def test_uploads_multiple_files():
     mock_mesh_inbox_scanner.scan.return_value = [mock_mesh_file, mock_second_mesh_file]
     mock_file_registry.is_already_processed.return_value = False
 
-    uploader = MeshToS3Synchronizer(mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader)
+    synchronizer = MeshToS3Synchronizer(
+        mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader
+    )
 
-    uploader.run()
+    synchronizer.synchronize()
 
     calls = [call(mock_mesh_file), call(mock_second_mesh_file)]
     mock_file_uploader.upload.assert_has_calls(calls)
@@ -72,9 +76,11 @@ def test_only_uploads_new_files():
 
     mock_mesh_inbox_scanner.scan.return_value = [mock_new_file, mock_old_file]
 
-    uploader = MeshToS3Synchronizer(mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader)
+    synchronizer = MeshToS3Synchronizer(
+        mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader
+    )
 
-    uploader.run()
+    synchronizer.synchronize()
 
     mock_file_uploader.upload.assert_called_once_with(MeshFile(path=Path("path/to/newfile.dat")))
 
@@ -89,10 +95,12 @@ def test_uploads_file_only_once():
 
     mock_mesh_inbox_scanner.scan.return_value = [mock_mesh_file]
 
-    uploader = MeshToS3Synchronizer(mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader)
+    synchronizer = MeshToS3Synchronizer(
+        mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader
+    )
 
-    uploader.run()
-    uploader.run()
+    synchronizer.synchronize()
+    synchronizer.synchronize()
 
     mock_file_uploader.upload.assert_called_once_with(mock_mesh_file)
 
@@ -114,9 +122,11 @@ def test_does_not_fail_when_mesh_file_exception_is_thrown():
     ]
     mock_file_uploader.upload.side_effect = [None, MeshFileException(), None]
 
-    uploader = MeshToS3Synchronizer(mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader)
+    synchronizer = MeshToS3Synchronizer(
+        mock_mesh_inbox_scanner, mock_file_registry, mock_file_uploader
+    )
 
-    uploader.run()
+    synchronizer.synchronize()
 
     calls = [call(mock_mesh_file_1), call(mock_mesh_file_2), call(mock_mesh_file_3)]
     mock_file_uploader.upload.assert_has_calls(calls)
