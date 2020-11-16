@@ -4,4 +4,4 @@ COPY s3-uploader/ s3-uploader/
 
 RUN cd s3-uploader/ && python3 setup.py install
 
-ENTRYPOINT sync-mesh-to-s3 --mesh-inbox $MESH_INBOX --s3-bucket $S3_BUCKET --state-file $STATE_FILE --s3-endpoint-url $S3_BUCKET_URL
+ENTRYPOINT sync-mesh-to-s3 --mesh-inbox $MESH_INBOX --s3-bucket $S3_BUCKET --state-file $STATE_FILE

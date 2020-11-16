@@ -1,0 +1,11 @@
+.DS_Store
+.idea/
+.vscode/
+
+build/
+dist/
+venv/
+.mypy_cache/
+*.pyc
+gp2gp_mesh_s3_uploader.egg-info
+.tox

@@ -32,9 +32,9 @@ class MeshToS3Synchronizer:
 
 def parse_arguments(argument_list):
     parser = ArgumentParser(description="MESH to s3 synchronizer")
-    parser.add_argument("--mesh-inbox", type=str)
-    parser.add_argument("--s3-bucket", type=str)
-    parser.add_argument("--state-file", type=str)
+    parser.add_argument("--mesh-inbox", type=str, required=True)
+    parser.add_argument("--s3-bucket", type=str, required=True)
+    parser.add_argument("--state-file", type=str, required=True)
     parser.add_argument("--s3-endpoint-url", type=str)
 
     return parser.parse_args(argument_list)
