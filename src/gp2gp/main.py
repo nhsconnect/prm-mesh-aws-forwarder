@@ -27,7 +27,6 @@ class SynchronizerService:
     def start(self):
         logger.info("Started synchronizer service")
         while not self._exit.is_set():
-            logger.info("Synchronizing")
             self._synchronizer.synchronize()
             self._exit.wait(self._sleep_duration)
         logger.info("Exiting synchronizer service")

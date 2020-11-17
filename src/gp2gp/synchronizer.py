@@ -16,6 +16,7 @@ class MeshToS3Synchronizer:
         for file in mesh_files:
             if not self._file_registry.is_already_processed(file):
                 try:
+                    logger.info(f"Synchronizing {file.path}")
                     self._file_uploader.upload(file)
                     self._file_registry.mark_processed(file)
                 except MeshFileException:
