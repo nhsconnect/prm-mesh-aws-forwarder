@@ -1,2 +1,2 @@
 def main():
-    print("hello mesh world!")
+    print("hello mesh world!")  # noqa: T001
