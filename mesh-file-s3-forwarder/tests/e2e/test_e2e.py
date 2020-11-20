@@ -86,7 +86,7 @@ def _run_synchronizer(mesh_inbox, bucket_name, state_file):
         "PATH": getenv("PATH"),
     }
     pipeline_command = f"\
-        sync-mesh-to-s3 \
+        forward-mesh-files-to-s3 \
         --mesh-inbox {str(mesh_inbox)}\
         --s3-bucket {bucket_name} \
         --state-file {str(state_file)} \
