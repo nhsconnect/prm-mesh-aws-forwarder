@@ -15,6 +15,7 @@ pipelines:
                 - docker
               tasks:
                 - exec:
+                    working_directory: mesh-file-s3-sync
                     command: /bin/bash
                     arguments:
                       - -c
@@ -27,6 +28,7 @@ pipelines:
                 - docker
               tasks:
                 - exec:
+                    working_directory: mesh-file-s3-sync
                     command: /bin/bash
                     arguments:
                       - -c
