@@ -3,7 +3,7 @@
 set -Eeo pipefail
 
 aws_region=eu-west-2
-image_repo_name=gp2gp/mesh-s3-synchronizer
+image_repo_name=registrations/mesh-inbox-s3-forwarder
 
 function docker_login {
   dojo -c Dojofile-infra "aws ecr get-login --no-include-email --region $aws_region"

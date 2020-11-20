@@ -7,5 +7,6 @@ dist/
 venv/
 .mypy_cache/
 *.pyc
-gp2gp_mesh_s3_uploader.egg-info
+gp2gp_mesh_file_s3_forwarder.egg-info
+mesh_inbox_s3_forwarder.egg-info
 .tox

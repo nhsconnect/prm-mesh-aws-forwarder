@@ -1,0 +1,80 @@
+#!/bin/bash
+
+set -Eeo pipefail
+
+aws_region=eu-west-2
+image_repo_name=registrations/mesh-file-s3-forwarder
+
+function docker_login {
+  dojo -c Dojofile-infra "aws ecr get-login --no-include-email --region $aws_region"
+}
+
+function get_aws_account_id {
+  dojo -c Dojofile-infra "aws sts get-caller-identity --query Account --output text"
+}
+
+function get_latest_commit_hash {
+  git rev-parse HEAD | cut -c 1-7
+}
+
+for command in "$@"
+do
+  echo "--- ${command} ---"
+  case "${command}" in
+    test)
+        tox -e py38
+        ;;
+    e2e-test)
+        tox -e e2e
+        ;;
+    format)
+        tox -e format
+        ;;
+    check-format)
+        tox -e check-format
+        ;;
+    lint)
+        tox -e flake8
+        tox -e bandit
+        ;;
+    typecheck)
+        tox -e mypy
+        ;;
+    check-deps)
+        tox -e check-deps
+        ;;
+    validate)
+        ./tasks check-format typecheck lint test
+        ;;
+    dojo-validate)
+        dojo "./tasks validate e2e-test"
+        ;;
+    clean)
+        find ./tests -type f -name "*.pyc" -delete
+        find ./tests -type d -name "__pycache__" -delete
+        find ./src -type f -name "*.pyc" -delete
+        find ./src -type d -name "__pycache__" -delete
+        find ./src -type f -path "*.egg-info*" -delete
+        find ./src -type d -path "*.egg-info" -delete
+        rm -rf build/ dist/ .pytest_cache/
+        ;;
+    devenv)
+        tox --recreate --devenv venv
+        ;;
+    build-docker)
+        aws_account_id=$(get_aws_account_id)
+        repository_uri=${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/${image_repo_name}
+        commit_hash=$(get_latest_commit_hash)
+        image_tag=${commit_hash}
+        docker build -t ${repository_uri}:latest -t ${repository_uri}:${image_tag} .
+        eval $(docker_login)
+        docker push ${repository_uri}
+    ;;
+    *)
+        echo "Invalid command: '${command}'"
+        exit 1
+        ;;
+  esac
+done
+
+set +e
