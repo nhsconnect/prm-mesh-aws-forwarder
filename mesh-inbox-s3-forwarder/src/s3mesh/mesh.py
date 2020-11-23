@@ -6,9 +6,10 @@ from mesh_client import MeshClient, Message
 class MeshMessage:
     def __init__(self, client_message: Message):
         self.id = client_message.id()
+        self._client_message = client_message
 
     def acknowledge(self):
-        raise NotImplementedError
+        self._client_message.acknowledge()
 
 
 class MeshInbox:
