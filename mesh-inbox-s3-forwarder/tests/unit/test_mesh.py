@@ -55,7 +55,7 @@ def test_mesh_inbox_returns_messages():
 
 
 def test_mesh_message_calls_acknowledge_on_underlying_client_message():
-    client_message = MagicMock()
+    client_message = _mock_client_message()
     message = MeshMessage(client_message)
 
     message.acknowledge()
@@ -90,10 +90,11 @@ def test_mesh_message_exposes_filename():
 
 
 def test_mesh_message_exposes_date_delivered():
-    mocked_date_delivered = a_datetime().strftime("%Y%m%d%H%M%S")
+    date_delivered = a_datetime()
+    status_timestamp_header = date_delivered.strftime("%Y%m%d%H%M%S")
     client_message = _mock_client_message(
-        mex_headers=_build_mex_headers(status_timestamp=mocked_date_delivered)
+        mex_headers=_build_mex_headers(status_timestamp=status_timestamp_header)
     )
     message = MeshMessage(client_message)
 
-    assert message.date_delivered == mocked_date_delivered
+    assert message.date_delivered == date_delivered

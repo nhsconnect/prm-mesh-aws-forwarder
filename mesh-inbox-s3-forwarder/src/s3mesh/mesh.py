@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Iterable
 
 from mesh_client import MeshClient, Message
@@ -8,7 +9,7 @@ class MeshMessage:
         self.id: str = client_message.id()
         self._client_message: Message = client_message
         self.filename: str = client_message.mex_header("filename")
-        self.date_delivered: str = client_message.mex_header("statustimestamp")
+        self.date_delivered: datetime = datetime.strptime(client_message.mex_header("statustimestamp"), "%Y%m%d%H%M%S")
 
     def acknowledge(self):
         self._client_message.acknowledge()
