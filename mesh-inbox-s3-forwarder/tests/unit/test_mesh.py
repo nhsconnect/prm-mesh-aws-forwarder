@@ -72,12 +72,16 @@ def test_mesh_message_exposes_message_id():
 
 
 def test_mesh_message_calls_read_on_underlying_client_message():
+    expected_value = "data"
+
     client_message = _mock_client_message()
+    client_message.read.return_value = expected_value
     message = MeshMessage(client_message)
 
-    message.read()
+    actual_value = message.read(n=43)
 
-    client_message.read.assert_called_once()
+    client_message.read.assert_called_once_with(43)
+    assert actual_value == expected_value
 
 
 def test_mesh_message_exposes_filename():
@@ -86,7 +90,7 @@ def test_mesh_message_exposes_filename():
     client_message = _mock_client_message(mex_headers=_build_mex_headers(file_name=mocked_filename))
     message = MeshMessage(client_message)
 
-    assert message.filename == mocked_filename
+    assert message.file_name == mocked_filename
 
 
 def test_mesh_message_exposes_date_delivered():

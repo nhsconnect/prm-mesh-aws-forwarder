@@ -1,5 +1,5 @@
 import ssl
-from os import path
+from os import path, environ
 from threading import Thread
 
 import boto3
@@ -36,9 +36,10 @@ FAKE_S3_URL = f"http://127.0.0.1:{FAKE_S3_PORT}"
 
 SENDING_MESH_MAILBOX = "e2e-test-mailbox-sender"
 RECEIVING_MESH_MAILBOX = "e2e-test-mailbox-receiver"
-S3_BUCKET = "e3e-test-bucket"
+S3_BUCKET = "e2e-test-bucket"
 
 WAIT_60_SEC = {"Delay": 5, "MaxAttempts": 12}
+frozen_time = a_datetime()
 
 
 class ThreadedHttpd:
@@ -122,20 +123,19 @@ def _build_mesh_client():
 def _build_s3_client():
     return boto3.client(
         service_name="s3",
-        region_name="us-west-1",
         endpoint_url=FAKE_S3_URL,
-        aws_access_key_id="testing",
-        aws_secret_access_key="testing",
     )
 
 
+@freeze_time(frozen_time)
 def test_mesh_inbox_s3_forwarder(tmpdir):
-    frozen_time = a_datetime()
+    environ["AWS_ACCESS_KEY_ID"] = "testing"
+    environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    environ["AWS_DEFAULT_REGION"] = "us-west-1"
 
     fake_mesh = _build_fake_mesh(path.join(tmpdir, "mesh"))
-    with freeze_time(frozen_time):
-        fake_mesh.start()
 
+    fake_mesh.start()
     fake_s3 = _build_fake_s3()
     fake_s3.start()
 

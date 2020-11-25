@@ -8,7 +8,7 @@ class MeshMessage:
     def __init__(self, client_message: Message):
         self.id: str = client_message.id()
         self._client_message: Message = client_message
-        self.filename: str = client_message.mex_header("filename")
+        self.file_name: str = client_message.mex_header("filename")
         self.date_delivered: datetime = datetime.strptime(
             client_message.mex_header("statustimestamp"), "%Y%m%d%H%M%S"
         )
@@ -16,8 +16,8 @@ class MeshMessage:
     def acknowledge(self):
         self._client_message.acknowledge()
 
-    def read(self):
-        self._client_message.read()
+    def read(self, n=None):
+        return self._client_message.read(n)
 
 
 class MeshInbox:
