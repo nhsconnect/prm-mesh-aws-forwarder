@@ -8,7 +8,7 @@ setup(
     install_requires=["boto3~=1.16", "mesh_client~=0.11"],
     entry_points={
         "console_scripts": [
-            "forward-mesh-inbox-to-s3=main:main",
+            "forward-mesh-inbox-to-s3=s3mesh.main:main",
         ]
     },
 )
