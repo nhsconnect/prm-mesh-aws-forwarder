@@ -1,17 +1,19 @@
+import re
 import ssl
+from datetime import datetime
 from os import path, environ
 from threading import Thread
+from time import sleep
 
 import boto3
 import mesh_client
 from fake_mesh import FakeMeshApplication
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 from cheroot.wsgi import Server
-from freezegun import freeze_time
 from moto.server import DomainDispatcherApplication, create_backend_app
 from s3mesh.main import build_forwarder_service, MeshConfig, S3Config
 
-from tests.builders.common import a_string, a_datetime
+from tests.builders.common import a_string
 
 
 def bundled_file(filename):
@@ -39,7 +41,6 @@ RECEIVING_MESH_MAILBOX = "e2e-test-mailbox-receiver"
 S3_BUCKET = "e2e-test-bucket"
 
 WAIT_60_SEC = {"Delay": 5, "MaxAttempts": 12}
-frozen_time = a_datetime()
 
 
 class ThreadedHttpd:
@@ -120,14 +121,29 @@ def _build_mesh_client():
     )
 
 
-def _build_s3_client():
-    return boto3.client(
+def _build_s3_resource():
+    return boto3.resource(
         service_name="s3",
         endpoint_url=FAKE_S3_URL,
     )
 
 
-@freeze_time(frozen_time)
+def _wait_for_object_count(bucket, expected_count):
+    object_count_match = _poll_until(lambda: len(list(bucket.objects.all())) >= expected_count)
+    assert object_count_match
+
+
+def _poll_until(function, timeout=30, poll_freq=1):
+    elapsed_seconds = 0
+    started_time = datetime.now()
+    condition_reached = False
+    while elapsed_seconds <= timeout and not condition_reached:
+        condition_reached = function()
+        sleep(poll_freq)
+        elapsed_seconds = (datetime.now() - started_time).seconds
+    return condition_reached
+
+
 def test_mesh_inbox_s3_forwarder(tmpdir):
     environ["AWS_ACCESS_KEY_ID"] = "testing"
     environ["AWS_SECRET_ACCESS_KEY"] = "testing"
@@ -142,10 +158,11 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
     forwarder = _build_forwarder()
 
     mesh = _build_mesh_client()
-    s3 = _build_s3_client()
+    s3 = _build_s3_resource()
 
-    s3.create_bucket(Bucket=S3_BUCKET)
-    s3.get_waiter("bucket_exists").wait(Bucket=S3_BUCKET)
+    bucket = s3.Bucket(S3_BUCKET)
+    bucket.create()
+    s3.meta.client.get_waiter("bucket_exists").wait(Bucket=S3_BUCKET)
 
     forwarder.start()
 
@@ -153,12 +170,10 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
 
     try:
         mesh.send_message(RECEIVING_MESH_MAILBOX, file_contents)
-        expected_key = frozen_time.strftime("%Y/%m/%d/%Y%m%d%H%M%S_000000000.dat")
-        s3.get_waiter("object_exists").wait(
-            Bucket=S3_BUCKET, Key=expected_key, WaiterConfig=WAIT_60_SEC
-        )
-        actual_object = s3.get_object(Bucket=S3_BUCKET, Key=expected_key)
-        actual_file_contents = actual_object["Body"].read()
+        _wait_for_object_count(bucket, expected_count=1)
+        actual_object = next(iter(bucket.objects.all()))
+        assert re.match(r"\d{4}/\d{2}/\d{2}/\d{14}_\d+\.dat", actual_object.key)
+        actual_file_contents = actual_object.get()["Body"].read()
         assert actual_file_contents == file_contents
     finally:
         fake_mesh.stop()
