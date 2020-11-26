@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass
 
 import boto3
@@ -7,10 +8,13 @@ from s3mesh.mesh import MeshInbox
 from s3mesh.s3 import S3Uploader
 from s3mesh.service import MeshToS3ForwarderService
 import mesh_client
+import logging
+
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
 def main():
-    print("hello mesh world!")  # noqa: T001
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
 
 
 @dataclass

@@ -154,6 +154,7 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
     try:
         mesh.send_message(RECEIVING_MESH_MAILBOX, file_contents)
         expected_key = frozen_time.strftime("%Y/%m/%d/%Y%m%d%H%M%S_000000000.dat")
+        print(expected_key)
         s3.get_waiter("object_exists").wait(
             Bucket=S3_BUCKET, Key=expected_key, WaiterConfig=WAIT_60_SEC
         )
@@ -164,3 +165,9 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
         fake_mesh.stop()
         fake_s3.stop()
         forwarder.stop()
+
+#Passed:
+#4830/03/25/48300325195452_000000000.dat
+
+#Failed:
+#e2e-test-bucket1000Nonefalse3335/11/27/33351127195343_000000000.dat3335-11-27T19:53:42.000Z"45a76f11e4c250df7b019381af5a1f48"10STANDARD75aa57f09aa0c8caeab4f8c24e99d10f8e7faeebf76c078efc7c6caea54ba06awebfile
