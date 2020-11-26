@@ -7,7 +7,20 @@ pipelines:
       git:
         type: configrepo
     stages:
-      - test:
+      - test_inbox_forwarder:
+          clean_workspace: true
+          jobs:
+            test:
+              resources:
+                - docker
+              tasks:
+                - exec:
+                    working_directory: mesh-inbox-s3-forwarder
+                    command: /bin/bash
+                    arguments:
+                      - -c
+                      - ./tasks dojo-validate
+      - test_file_forwarder:
           clean_workspace: true
           jobs:
             test:
@@ -20,7 +33,7 @@ pipelines:
                     arguments:
                       - -c
                       - ./tasks dojo-validate
-      - build:
+      - build_file_forwarder:
           clean_workspace: true
           jobs:
             build:
