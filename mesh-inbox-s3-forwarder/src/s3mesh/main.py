@@ -1,4 +1,5 @@
 import sys
+from argparse import ArgumentParser
 from dataclasses import dataclass
 
 import boto3
@@ -15,6 +16,46 @@ LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 def main():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=LOG_FORMAT)
+    args = parse_arguments(sys.argv[1:])
+
+    forwarder_service = build_forwarder_service(
+        mesh_config=MeshConfig(
+            url=args.mesh_url,
+            mailbox=args.mesh_mailbox,
+            password=args.mesh_password,
+            shared_key=args.mesh_shared_key,
+            client_cert_path=args.mesh_client_cert_path,
+            client_key_path=args.mesh_client_key_path,
+            ca_cert_path=args.mesh_ca_cert_path,
+        ),
+        s3_config=S3Config(
+            bucket_name=args.s3_bucket_name,
+            endpoint_url=args.s3_endpoint_url,
+        ),
+        poll_frequency_sec=args.poll_frequency,
+    )
+
+    forwarder_service.start()
+
+
+def utf8_bytes(value):
+    return bytes(value, "utf-8")
+
+
+def parse_arguments(argument_list):
+    parser = ArgumentParser(description="MESH to S3 Forwarder")
+    parser.add_argument("--mesh-mailbox", type=str)
+    parser.add_argument("--mesh-password", type=str)
+    parser.add_argument("--mesh-url", type=str)
+    parser.add_argument("--mesh-shared-key", type=utf8_bytes)
+    parser.add_argument("--mesh-client-cert-path", type=str)
+    parser.add_argument("--mesh-client-key-path", type=str)
+    parser.add_argument("--mesh-ca-cert-path", type=str)
+    parser.add_argument("--s3-bucket-name", type=str)
+    parser.add_argument("--s3-endpoint-url", type=str, required=False, default=None)
+    parser.add_argument("--poll-frequency", type=int, required=False, default=10)
+
+    return parser.parse_args(argument_list)
 
 
 @dataclass
