@@ -44,14 +44,14 @@ def utf8_bytes(value):
 
 def parse_arguments(argument_list):
     parser = ArgumentParser(description="MESH to S3 Forwarder")
-    parser.add_argument("--mesh-mailbox", type=str)
-    parser.add_argument("--mesh-password", type=str)
-    parser.add_argument("--mesh-url", type=str)
-    parser.add_argument("--mesh-shared-key", type=utf8_bytes)
-    parser.add_argument("--mesh-client-cert-path", type=str)
-    parser.add_argument("--mesh-client-key-path", type=str)
-    parser.add_argument("--mesh-ca-cert-path", type=str)
-    parser.add_argument("--s3-bucket-name", type=str)
+    parser.add_argument("--mesh-mailbox", type=str, required=True)
+    parser.add_argument("--mesh-password", type=str, required=True)
+    parser.add_argument("--mesh-url", type=str, required=True)
+    parser.add_argument("--mesh-shared-key", type=utf8_bytes, required=True)
+    parser.add_argument("--mesh-client-cert-path", type=str, required=True)
+    parser.add_argument("--mesh-client-key-path", type=str, required=True)
+    parser.add_argument("--mesh-ca-cert-path", type=str, required=True)
+    parser.add_argument("--s3-bucket-name", type=str, required=True)
     parser.add_argument("--s3-endpoint-url", type=str, required=False, default=None)
     parser.add_argument("--poll-frequency", type=int, required=False, default=10)
 
