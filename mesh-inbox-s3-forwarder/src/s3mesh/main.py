@@ -1,6 +1,7 @@
 import sys
 from argparse import ArgumentParser
 from dataclasses import dataclass
+from typing import Optional
 
 import boto3
 
@@ -72,14 +73,14 @@ class MeshConfig:
 @dataclass
 class S3Config:
     bucket_name: str
-    endpoint_url: str
+    endpoint_url: Optional[str]
 
 
 def build_forwarder_service(
     mesh_config: MeshConfig,
     s3_config: S3Config,
     poll_frequency_sec,
-):
+) -> MeshToS3ForwarderService:
     s3 = boto3.client(service_name="s3", endpoint_url=s3_config.endpoint_url)
     uploader = S3Uploader(s3, s3_config.bucket_name)
 
