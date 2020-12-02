@@ -3,42 +3,14 @@ from dataclasses import dataclass, fields
 from os import environ
 from os.path import join
 from signal import signal, SIGINT, SIGTERM
-from sys import exit, stdout
+from sys import stdout
 
 import boto3
+
+from s3mesh.config import ForwarderConfig
 from s3mesh.main import build_forwarder_service, MeshConfig, S3Config
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-
-def read_env(env_var):
-    if env_var not in environ:
-        print(f"Expected environment variable {env_var} was not set, exiting...")
-        exit(1)
-    return environ[env_var]
-
-
-@dataclass
-class Config:
-    mesh_url: str
-    mesh_mailbox_ssm_param_name: str
-    mesh_password_ssm_param_name: str
-    mesh_shared_key_ssm_param_name: str
-    mesh_client_cert_ssm_param_name: str
-    mesh_client_key_ssm_param_name: str
-    mesh_ca_cert_ssm_param_name: str
-    s3_bucket_name: str
-    poll_frequency: str
-    forwarder_home: str
-
-    @classmethod
-    def from_environment_variables(cls):
-        return cls(
-            **{
-                field.name: read_env(field.name.upper())
-                for field in fields(cls)
-            }
-        )
 
 
 def read_ssm_param(ssm, param_name):
@@ -52,7 +24,7 @@ def write_file(contents, file_path):
 
 
 def main():
-    config = Config.from_environment_variables()
+    config = ForwarderConfig.from_environment_variables()
 
     ssm = boto3.client('ssm')
 
