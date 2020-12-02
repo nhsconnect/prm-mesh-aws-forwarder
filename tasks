@@ -44,10 +44,10 @@ do
         tox -e check-deps
         ;;
     validate)
-        ./tasks check-format typecheck lint test
+        ./tasks check-format typecheck lint test e2e-test
         ;;
     dojo-validate)
-        dojo "./tasks validate e2e-test"
+        dojo "./tasks validate"
         ;;
     clean)
         find ./tests -type f -name "*.pyc" -delete
