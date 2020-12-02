@@ -15,7 +15,6 @@ pipelines:
                 - docker
               tasks:
                 - exec:
-                    working_directory: mesh-inbox-s3-forwarder
                     command: /bin/bash
                     arguments:
                       - -c
@@ -28,33 +27,6 @@ pipelines:
                 - docker
               tasks:
                 - exec:
-                    working_directory: mesh-inbox-s3-forwarder
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks build-docker
-      - test_file_forwarder:
-          clean_workspace: true
-          jobs:
-            test:
-              resources:
-                - docker
-              tasks:
-                - exec:
-                    working_directory: mesh-file-s3-forwarder
-                    command: /bin/bash
-                    arguments:
-                      - -c
-                      - ./tasks dojo-validate
-      - build_file_forwarder:
-          clean_workspace: true
-          jobs:
-            build:
-              resources:
-                - docker
-              tasks:
-                - exec:
-                    working_directory: mesh-file-s3-forwarder
                     command: /bin/bash
                     arguments:
                       - -c
