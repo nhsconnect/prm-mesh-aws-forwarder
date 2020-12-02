@@ -1,6 +1,7 @@
 FROM python:3.8-alpine
 
 ENV POLL_FREQUENCY=60
+ENV FORWARDER_HOME=/mesh-forwarder
 
 RUN addgroup --system mesh && adduser --ingroup mesh --system mesh
 
