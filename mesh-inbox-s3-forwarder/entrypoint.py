@@ -88,7 +88,7 @@ def main():
             bucket_name=config.s3_bucket_name,
             endpoint_url=None
         ),
-        poll_frequency_sec=config.poll_frequency,
+        poll_frequency_sec=int(config.poll_frequency),
     )
 
     def handle_sigterm(signum, frame):
