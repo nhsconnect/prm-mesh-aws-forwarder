@@ -21,12 +21,12 @@ def read_env(env_var):
 @dataclass
 class Config:
     mesh_url: str
-    mesh_mailbox_ssm_param: str
-    mesh_password_ssm_param: str
-    mesh_shared_key_ssm_param: str
-    mesh_client_cert_ssm_param: str
-    mesh_client_key_ssm_param: str
-    mesh_ca_cert_ssm_param: str
+    mesh_mailbox_ssm_param_name: str
+    mesh_password_ssm_param_name: str
+    mesh_shared_key_ssm_param_name: str
+    mesh_client_cert_ssm_param_name: str
+    mesh_client_key_ssm_param_name: str
+    mesh_ca_cert_ssm_param_name: str
     s3_bucket_name: str
     poll_frequency: str
     forwarder_home: str
@@ -60,13 +60,13 @@ def main():
     mesh_client_key_path = join(config.forwarder_home, "client_key.pem")
     mesh_ca_cert_path = join(config.forwarder_home, "ca_cert.pem")
 
-    mesh_client_cert = read_ssm_param(ssm, config.mesh_client_cert_ssm_param)
-    mesh_client_key = read_ssm_param(ssm, config.mesh_client_key_ssm_param)
-    mesh_ca_cert = read_ssm_param(ssm, config.mesh_ca_cert_ssm_param)
+    mesh_client_cert = read_ssm_param(ssm, config.mesh_client_cert_ssm_param_name)
+    mesh_client_key = read_ssm_param(ssm, config.mesh_client_key_ssm_param_name)
+    mesh_ca_cert = read_ssm_param(ssm, config.mesh_ca_cert_ssm_param_name)
 
-    mesh_mailbox = read_ssm_param(ssm, config.mesh_mailbox_ssm_param)
-    mesh_password = read_ssm_param(ssm, config.mesh_password_ssm_param)
-    mesh_shared_key = read_ssm_param(ssm, config.mesh_shared_key_ssm_param)
+    mesh_mailbox = read_ssm_param(ssm, config.mesh_mailbox_ssm_param_name)
+    mesh_password = read_ssm_param(ssm, config.mesh_password_ssm_param_name)
+    mesh_shared_key = read_ssm_param(ssm, config.mesh_shared_key_ssm_param_name)
 
     write_file(mesh_client_cert, mesh_client_cert_path)
     write_file(mesh_client_key, mesh_client_key_path)
