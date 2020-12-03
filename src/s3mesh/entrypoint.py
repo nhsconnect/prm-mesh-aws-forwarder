@@ -7,18 +7,9 @@ import boto3
 
 from s3mesh.config import ForwarderConfig
 from s3mesh.forwarder import build_forwarder_service, MeshConfig, S3Config
+from s3mesh.secrets import SsmSecretManager
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-
-def read_ssm_param(ssm, param_name):
-    response = ssm.get_parameter(Name=param_name, WithDecryption=True)
-    return response["Parameter"]["Value"]
-
-
-def write_file(contents, file_path):
-    with open(file_path, "w") as f:
-        f.write(contents)
 
 
 def main():
@@ -30,17 +21,15 @@ def main():
     mesh_client_key_path = join(config.forwarder_home, "client_key.pem")
     mesh_ca_cert_path = join(config.forwarder_home, "ca_cert.pem")
 
-    mesh_client_cert = read_ssm_param(ssm, config.mesh_client_cert_ssm_param_name)
-    mesh_client_key = read_ssm_param(ssm, config.mesh_client_key_ssm_param_name)
-    mesh_ca_cert = read_ssm_param(ssm, config.mesh_ca_cert_ssm_param_name)
+    secret_manager = SsmSecretManager(ssm)
 
-    mesh_mailbox = read_ssm_param(ssm, config.mesh_mailbox_ssm_param_name)
-    mesh_password = read_ssm_param(ssm, config.mesh_password_ssm_param_name)
-    mesh_shared_key = read_ssm_param(ssm, config.mesh_shared_key_ssm_param_name)
+    secret_manager.download_secret(config.mesh_client_cert_ssm_param_name, mesh_client_cert_path)
+    secret_manager.download_secret(config.mesh_client_key_ssm_param_name, mesh_client_key_path)
+    secret_manager.download_secret(config.mesh_ca_cert_ssm_param_name, mesh_ca_cert_path)
 
-    write_file(mesh_client_cert, mesh_client_cert_path)
-    write_file(mesh_client_key, mesh_client_key_path)
-    write_file(mesh_ca_cert, mesh_ca_cert_path)
+    mesh_mailbox = secret_manager.get_secret(config.mesh_mailbox_ssm_param_name)
+    mesh_password = secret_manager.get_secret(config.mesh_password_ssm_param_name)
+    mesh_shared_key = secret_manager.get_secret(config.mesh_shared_key_ssm_param_name)
 
     logging.basicConfig(stream=stdout, level=logging.INFO, format=LOG_FORMAT)
 
