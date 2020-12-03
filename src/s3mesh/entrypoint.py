@@ -1,12 +1,12 @@
 import logging
 from os.path import join
-from signal import signal, SIGINT, SIGTERM
+from signal import SIGINT, SIGTERM, signal
 from sys import stdout
 
 import boto3
 
 from s3mesh.config import ForwarderConfig
-from s3mesh.forwarder import build_forwarder_service, MeshConfig, S3Config
+from s3mesh.forwarder import MeshConfig, S3Config, build_forwarder_service
 from s3mesh.secrets import SsmSecretManager
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from threading import Event
 from typing import Iterable, Optional
@@ -7,7 +8,6 @@ import mesh_client
 
 from s3mesh.mesh import MeshInbox, MeshMessage
 from s3mesh.s3 import S3Uploader
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -1,7 +1,7 @@
+from datetime import datetime
 from unittest.mock import MagicMock
 
 from s3mesh.s3 import S3Uploader
-from datetime import datetime
 
 
 def test_upload():

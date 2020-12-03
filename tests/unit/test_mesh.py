@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
-from tests.builders.common import a_string, a_datetime
 from s3mesh.mesh import MeshInbox, MeshMessage
+from tests.builders.common import a_datetime, a_string
 
 
 def _a_timestamp():
