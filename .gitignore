@@ -10,3 +10,4 @@ venv/
 gp2gp_mesh_file_s3_forwarder.egg-info
 mesh_inbox_s3_forwarder.egg-info
 .tox
+.coverage
