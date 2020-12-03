@@ -1,4 +1,4 @@
-# prm-gp2gp-mesh-s3-forwarder"
+# prm-gp2gp-mesh-s3-forwarder
 
 Generic MESH to S3 forwarder, capable of reading messages from a MESH inbox and writing them to AWS S3.
 
