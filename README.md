@@ -1,7 +1,7 @@
-# prm-gp2gp-docker-mi-data-uploader
+# prm-gp2gp-mesh-s3-forwarder"
 
-Repo to spin up PRM's GP2GP MI Data Uploader
+Generic MESH to S3 forwarder, capable of reading messages from a MESH inbox and writing them to AWS S3.
 
 ## Checks before committing
 
-Run the following commands: `./tasks validate e2e-test` to run formatting, e2e tests and unit tests before committing.
+Run the following commands: `./tasks validate` to run formatting, e2e tests and unit tests before committing.
