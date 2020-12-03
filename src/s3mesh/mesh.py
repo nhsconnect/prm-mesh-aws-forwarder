@@ -6,6 +6,9 @@ from mesh_client import MeshClient, Message
 
 class MeshMessage:
     def __init__(self, client_message: Message):
+        if client_message.mex_header("statusevent") != "TRANSFER":
+            raise UnexpectedStatusEvent()
+
         self.id: str = client_message.id()
         self._client_message: Message = client_message
         self.file_name: str = client_message.mex_header("filename")
@@ -27,3 +30,7 @@ class MeshInbox:
     def read_messages(self) -> Iterable[MeshMessage]:
         for client_message in self._client.iterate_all_messages():
             yield MeshMessage(client_message)
+
+
+class UnexpectedStatusEvent(Exception):
+    pass
