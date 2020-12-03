@@ -1,9 +1,17 @@
+import logging
+import sys
 from dataclasses import dataclass, fields
 from os import environ
 
+logger = logging.getLogger(__name__)
+
 
 def read_env(env_var):
-    return environ[env_var]
+    if env_var not in environ:
+        logger.error(f"Expected environment variable {env_var} was not set, exiting...")
+        sys.exit(1)
+    else:
+        return environ[env_var]
 
 
 @dataclass

@@ -1,4 +1,5 @@
 from os import environ
+from unittest import mock
 from unittest.mock import patch
 
 from s3mesh.config import ForwarderConfig
@@ -35,3 +36,11 @@ def test_read_config_from_environment():
         actual_config = ForwarderConfig.from_environment_variables()
 
     assert actual_config == expected_config
+
+
+@mock.patch("sys.exit")
+def test_read_config_from_environment_calls_exit_when_missing_variable(mock_exit):
+    with patch.dict(environ, {}, clear=True):
+        ForwarderConfig.from_environment_variables()
+
+    mock_exit.assert_called_with(1)
