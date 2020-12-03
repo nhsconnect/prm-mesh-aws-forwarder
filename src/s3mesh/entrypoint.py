@@ -1,6 +1,4 @@
 import logging
-from dataclasses import dataclass, fields
-from os import environ
 from os.path import join
 from signal import signal, SIGINT, SIGTERM
 from sys import stdout
@@ -8,25 +6,25 @@ from sys import stdout
 import boto3
 
 from s3mesh.config import ForwarderConfig
-from s3mesh.main import build_forwarder_service, MeshConfig, S3Config
+from s3mesh.forwarder import build_forwarder_service, MeshConfig, S3Config
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
 
 def read_ssm_param(ssm, param_name):
     response = ssm.get_parameter(Name=param_name, WithDecryption=True)
-    return response['Parameter']['Value']
+    return response["Parameter"]["Value"]
 
 
 def write_file(contents, file_path):
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         f.write(contents)
 
 
 def main():
     config = ForwarderConfig.from_environment_variables()
 
-    ssm = boto3.client('ssm')
+    ssm = boto3.client("ssm")
 
     mesh_client_cert_path = join(config.forwarder_home, "client_cert.pem")
     mesh_client_key_path = join(config.forwarder_home, "client_key.pem")
@@ -56,10 +54,7 @@ def main():
             client_key_path=mesh_client_key_path,
             ca_cert_path=mesh_ca_cert_path,
         ),
-        s3_config=S3Config(
-            bucket_name=config.s3_bucket_name,
-            endpoint_url=None
-        ),
+        s3_config=S3Config(bucket_name=config.s3_bucket_name, endpoint_url=None),
         poll_frequency_sec=int(config.poll_frequency),
     )
 

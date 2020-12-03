@@ -11,7 +11,7 @@ from fake_mesh import FakeMeshApplication
 from cheroot.ssl.builtin import BuiltinSSLAdapter
 from cheroot.wsgi import Server
 from moto.server import DomainDispatcherApplication, create_backend_app
-from s3mesh.main import build_forwarder_service, MeshConfig, S3Config
+from s3mesh.forwarder import build_forwarder_service, MeshConfig, S3Config
 
 from tests.builders.common import a_string
 
