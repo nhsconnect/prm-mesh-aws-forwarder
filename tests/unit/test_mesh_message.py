@@ -68,7 +68,7 @@ def test_throws_exception_when_status_event_header_is_not_transfer():
 
 
 def test_exception_records_header_when_status_event_header_is_not_transfer():
-    message_id = "abc1"
+    message_id = a_string()
     status_event_header = "COLLECT"
     client_message = mock_client_message(
         message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_header)
@@ -91,7 +91,7 @@ def test_throws_exception_when_status_success_header_is_not_success():
 
 
 def test_exception_records_header_when_status_success_header_is_not_success():
-    message_id = "abc2"
+    message_id = a_string()
     status_success_header = "ERROR"
     client_message = mock_client_message(
         message_id=message_id, mex_headers=build_mex_headers(status_success=status_success_header)
@@ -114,7 +114,7 @@ def test_throws_exception_when_message_type_header_is_not_data():
 
 
 def test_exception_records_header_when_message_type_header_is_not_data():
-    message_id = "abc3"
+    message_id = a_string()
     message_type_header = "REPORT"
     client_message = mock_client_message(
         message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header)

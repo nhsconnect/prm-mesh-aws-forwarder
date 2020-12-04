@@ -35,24 +35,31 @@ class MeshInbox:
 
     def read_messages(self) -> Iterable[MeshMessage]:
         for client_message in self._client.iterate_all_messages():
-            yield MeshMessage(client_message)
+            try:
+                yield MeshMessage(client_message)
+            except InvalidMeshHeader:
+                pass
 
 
-class UnexpectedStatusEvent(Exception):
+class InvalidMeshHeader(Exception):
+    pass
+
+
+class UnexpectedStatusEvent(InvalidMeshHeader):
     def __init__(self, message_id, status_event_header):
         super().__init__("Unexpected status event header")
         self.message_id = message_id
         self.status_event_header = status_event_header
 
 
-class UnsuccessfulStatus(Exception):
+class UnsuccessfulStatus(InvalidMeshHeader):
     def __init__(self, message_id, status_success_header):
         super().__init__("Unsuccessful status header")
         self.message_id = message_id
         self.status_success_header = status_success_header
 
 
-class UnexpectedMessageType(Exception):
+class UnexpectedMessageType(InvalidMeshHeader):
     def __init__(self, message_id, message_type_header):
         super().__init__("Unexpected message type header")
         self.message_id = message_id
