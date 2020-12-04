@@ -6,15 +6,19 @@ from mesh_client import MeshClient, Message
 
 class MeshMessage:
     def __init__(self, client_message: Message):
-        if client_message.mex_header("statusevent") != "TRANSFER":
-            raise UnexpectedStatusEvent()
-
         self.id: str = client_message.id()
         self._client_message: Message = client_message
         self.file_name: str = client_message.mex_header("filename")
         self.date_delivered: datetime = datetime.strptime(
             client_message.mex_header("statustimestamp"), "%Y%m%d%H%M%S"
         )
+        self._validate_message()
+
+    def _validate_message(self):
+        if self._client_message.mex_header("statusevent") != "TRANSFER":
+            raise UnexpectedStatusEvent()
+        if self._client_message.mex_header("statussuccess") != "SUCCESS":
+            raise UnsuccessfulStatus()
 
     def acknowledge(self):
         self._client_message.acknowledge()
@@ -33,4 +37,8 @@ class MeshInbox:
 
 
 class UnexpectedStatusEvent(Exception):
+    pass
+
+
+class UnsuccessfulStatus(Exception):
     pass

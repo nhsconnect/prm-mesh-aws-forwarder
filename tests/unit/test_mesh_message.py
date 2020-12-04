@@ -1,6 +1,6 @@
 import pytest
 
-from s3mesh.mesh import MeshMessage, UnexpectedStatusEvent
+from s3mesh.mesh import MeshMessage, UnexpectedStatusEvent, UnsuccessfulStatus
 from tests.builders.common import a_datetime, a_string
 from tests.builders.mesh import a_filename, a_timestamp, build_mex_headers, mock_client_message
 
@@ -59,4 +59,11 @@ def test_throws_exception_when_event_header_is_not_transfer():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_event="COLLECT"))
 
     with pytest.raises(UnexpectedStatusEvent):
+        MeshMessage(client_message)
+
+
+def test_throws_exception_when_status_success_header_is_not_success():
+    client_message = mock_client_message(mex_headers=build_mex_headers(status_success="ERROR"))
+
+    with pytest.raises(UnsuccessfulStatus):
         MeshMessage(client_message)
