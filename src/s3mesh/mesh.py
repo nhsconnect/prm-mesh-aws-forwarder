@@ -16,11 +16,11 @@ class MeshMessage:
 
     def _validate_message(self):
         if self._client_message.mex_header("statusevent") != "TRANSFER":
-            raise UnexpectedStatusEvent()
+            raise UnexpectedStatusEvent(self.id, self._client_message.mex_header("statusevent"))
         if self._client_message.mex_header("statussuccess") != "SUCCESS":
-            raise UnsuccessfulStatus()
+            raise UnsuccessfulStatus(self.id, self._client_message.mex_header("statussuccess"))
         if self._client_message.mex_header("messagetype") != "DATA":
-            raise UnexpectedMessageType()
+            raise UnexpectedMessageType(self.id, self._client_message.mex_header("messagetype"))
 
     def acknowledge(self):
         self._client_message.acknowledge()
@@ -39,12 +39,21 @@ class MeshInbox:
 
 
 class UnexpectedStatusEvent(Exception):
-    pass
+    def __init__(self, message_id, status_event_header):
+        super().__init__("Unexpected status event header")
+        self.message_id = message_id
+        self.status_event_header = status_event_header
 
 
 class UnsuccessfulStatus(Exception):
-    pass
+    def __init__(self, message_id, status_success_header):
+        super().__init__("Unsuccessful status header")
+        self.message_id = message_id
+        self.status_success_header = status_success_header
 
 
 class UnexpectedMessageType(Exception):
-    pass
+    def __init__(self, message_id, message_type_header):
+        super().__init__("Unexpected message type header")
+        self.message_id = message_id
+        self.message_type_header = message_type_header
