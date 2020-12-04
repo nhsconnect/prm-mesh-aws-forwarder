@@ -19,6 +19,8 @@ class MeshMessage:
             raise UnexpectedStatusEvent()
         if self._client_message.mex_header("statussuccess") != "SUCCESS":
             raise UnsuccessfulStatus()
+        if self._client_message.mex_header("messagetype") != "DATA":
+            raise UnexpectedMessageType()
 
     def acknowledge(self):
         self._client_message.acknowledge()
@@ -41,4 +43,8 @@ class UnexpectedStatusEvent(Exception):
 
 
 class UnsuccessfulStatus(Exception):
+    pass
+
+
+class UnexpectedMessageType(Exception):
     pass

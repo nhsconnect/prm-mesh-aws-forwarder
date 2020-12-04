@@ -1,6 +1,11 @@
 import pytest
 
-from s3mesh.mesh import MeshMessage, UnexpectedStatusEvent, UnsuccessfulStatus
+from s3mesh.mesh import (
+    MeshMessage,
+    UnexpectedMessageType,
+    UnexpectedStatusEvent,
+    UnsuccessfulStatus,
+)
 from tests.builders.common import a_datetime, a_string
 from tests.builders.mesh import a_filename, a_timestamp, build_mex_headers, mock_client_message
 
@@ -66,4 +71,11 @@ def test_throws_exception_when_status_success_header_is_not_success():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_success="ERROR"))
 
     with pytest.raises(UnsuccessfulStatus):
+        MeshMessage(client_message)
+
+
+def test_throws_exception_when_message_type_is_not_data():
+    client_message = mock_client_message(mex_headers=build_mex_headers(message_type="REPORT"))
+
+    with pytest.raises(UnexpectedMessageType):
         MeshMessage(client_message)
