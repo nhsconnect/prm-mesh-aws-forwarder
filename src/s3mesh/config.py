@@ -1,17 +1,20 @@
 import logging
 import sys
-from dataclasses import dataclass, fields
-from os import environ
+from dataclasses import MISSING, dataclass, fields
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 
-def read_env(env_var):
-    if env_var not in environ:
+def _read_env(field, env_vars):
+    env_var = field.name.upper()
+    if env_var in env_vars:
+        return env_vars[env_var]
+    elif field.default != MISSING:
+        return field.default
+    else:
         logger.error(f"Expected environment variable {env_var} was not set, exiting...")
         sys.exit(1)
-    else:
-        return environ[env_var]
 
 
 @dataclass
@@ -26,7 +29,9 @@ class ForwarderConfig:
     s3_bucket_name: str
     poll_frequency: str
     forwarder_home: str
+    s3_endpoint_url: Optional[str] = None
+    ssm_endpoint_url: Optional[str] = None
 
     @classmethod
-    def from_environment_variables(cls):
-        return cls(**{field.name: read_env(field.name.upper()) for field in fields(cls)})
+    def from_environment_variables(cls, env_vars):
+        return cls(**{field.name: _read_env(field, env_vars) for field in fields(cls)})
