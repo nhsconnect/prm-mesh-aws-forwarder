@@ -69,18 +69,18 @@ def test_throws_exception_when_status_event_header_is_not_transfer():
 
 def test_exception_records_header_when_status_event_header_is_not_transfer():
     message_id = a_string()
-    status_event_header = "COLLECT"
+    status_event_header_value = "COLLECT"
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_header)
+        message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_header_value)
     )
-    expected_message = "Unexpected status event header"
 
     try:
         MeshMessage(client_message)
-    except Exception as e:
-        assert str(e) == expected_message
+    except UnexpectedStatusEvent as e:
         assert e.message_id == message_id
-        assert e.status_event_header == status_event_header
+        assert e.header_value == status_event_header_value
+        assert e.header_name == "statusevent"
+        assert e.expected_header_value == "TRANSFER"
 
 
 def test_throws_exception_when_status_success_header_is_not_success():
@@ -92,18 +92,19 @@ def test_throws_exception_when_status_success_header_is_not_success():
 
 def test_exception_records_header_when_status_success_header_is_not_success():
     message_id = a_string()
-    status_success_header = "ERROR"
+    status_success_header_value = "ERROR"
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(status_success=status_success_header)
+        message_id=message_id,
+        mex_headers=build_mex_headers(status_success=status_success_header_value),
     )
-    expected_message = "Unsuccessful status header"
 
     try:
         MeshMessage(client_message)
-    except Exception as e:
-        assert str(e) == expected_message
+    except UnsuccessfulStatus as e:
         assert e.message_id == message_id
-        assert e.status_success_header == status_success_header
+        assert e.header_value == status_success_header_value
+        assert e.header_name == "statussuccess"
+        assert e.expected_header_value == "SUCCESS"
 
 
 def test_throws_exception_when_message_type_header_is_not_data():
@@ -115,15 +116,15 @@ def test_throws_exception_when_message_type_header_is_not_data():
 
 def test_exception_records_header_when_message_type_header_is_not_data():
     message_id = a_string()
-    message_type_header = "REPORT"
+    message_type_header_value = "REPORT"
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header)
+        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header_value)
     )
-    expected_message = "Unexpected message type header"
 
     try:
         MeshMessage(client_message)
-    except Exception as e:
-        assert str(e) == expected_message
+    except UnexpectedMessageType as e:
         assert e.message_id == message_id
-        assert e.message_type_header == message_type_header
+        assert e.header_value == message_type_header_value
+        assert e.header_name == "messagetype"
+        assert e.expected_header_value == "DATA"

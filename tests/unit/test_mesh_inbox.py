@@ -81,4 +81,49 @@ def test_calls_logger_with_a_warning_when_header_statussuccess_is_not_success():
     with mock.patch.object(logger, "warning") as mock_warn:
         list(mesh_inbox.read_messages())
 
-    mock_warn.assert_called_with(f"Message {message_id}: unexpected status header {error_status}")
+    mock_warn.assert_called_with(
+        f"Message {message_id}: "
+        f"Invalid MESH statussuccess header - expected: SUCCESS, instead got: {error_status}"
+    )
+
+
+def test_calls_logger_with_a_warning_when_header_messagetype_is_not_data():
+    logger = logging.getLogger("s3mesh.mesh")
+    mock_mesh_client = MagicMock()
+    message_id = a_string()
+    message_type = "TEXT"
+    unsuccessful_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type)
+    )
+    client_messages = [unsuccessful_message]
+    mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    mesh_inbox = MeshInbox(mock_mesh_client)
+
+    with mock.patch.object(logger, "warning") as mock_warn:
+        list(mesh_inbox.read_messages())
+
+    mock_warn.assert_called_with(
+        f"Message {message_id}: "
+        f"Invalid MESH messagetype header - expected: DATA, instead got: {message_type}"
+    )
+
+
+def test_calls_logger_with_a_warning_when_header_statusevent_is_not_transfer():
+    logger = logging.getLogger("s3mesh.mesh")
+    mock_mesh_client = MagicMock()
+    message_id = a_string()
+    statusevent = "UPLOAD"
+    unsuccessful_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(status_event=statusevent)
+    )
+    client_messages = [unsuccessful_message]
+    mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    mesh_inbox = MeshInbox(mock_mesh_client)
+
+    with mock.patch.object(logger, "warning") as mock_warn:
+        list(mesh_inbox.read_messages())
+
+    mock_warn.assert_called_with(
+        f"Message {message_id}: "
+        f"Invalid MESH statusevent header - expected: TRANSFER, instead got: {statusevent}"
+    )
