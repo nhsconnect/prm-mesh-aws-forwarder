@@ -1,7 +1,10 @@
+import logging
 from datetime import datetime
 from typing import Iterable
 
 from mesh_client import MeshClient, Message
+
+logger = logging.getLogger(__name__)
 
 
 class MeshMessage:
@@ -37,6 +40,11 @@ class MeshInbox:
         for client_message in self._client.iterate_all_messages():
             try:
                 yield MeshMessage(client_message)
+            except UnsuccessfulStatus:
+                logger.warning(
+                    f"Message {client_message.id()}: "
+                    f"unexpected status header {client_message.mex_header('statussuccess')}"
+                )
             except InvalidMeshHeader:
                 pass
 

@@ -1,3 +1,5 @@
+import logging
+from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
@@ -62,3 +64,21 @@ def test_does_not_catch_generic_exception():
 
     with pytest.raises(Exception):
         list(mesh_inbox.read_messages())
+
+
+def test_calls_logger_with_a_warning_when_header_statussuccess_is_not_success():
+    logger = logging.getLogger("s3mesh.mesh")
+    mock_mesh_client = MagicMock()
+    message_id = a_string()
+    error_status = "ERROR"
+    unsuccessful_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(status_success=error_status)
+    )
+    client_messages = [unsuccessful_message]
+    mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    mesh_inbox = MeshInbox(mock_mesh_client)
+
+    with mock.patch.object(logger, "warning") as mock_warn:
+        list(mesh_inbox.read_messages())
+
+    mock_warn.assert_called_with(f"Message {message_id}: unexpected status header {error_status}")
