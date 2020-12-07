@@ -4,6 +4,10 @@ from typing import Iterable
 
 from mesh_client import MeshClient, Message
 
+MESH_STATUS_EVENT_TRANSFER = "TRANSFER"
+MESH_MESSAGE_TYPE_DATA = "DATA"
+MESH_STATUS_SUCCESS = "SUCCESS"
+
 logger = logging.getLogger(__name__)
 
 
@@ -18,11 +22,11 @@ class MeshMessage:
         self._validate_message()
 
     def _validate_message(self):
-        if self._client_message.mex_header("statusevent") != "TRANSFER":
+        if self._client_message.mex_header("statusevent") != MESH_STATUS_EVENT_TRANSFER:
             raise UnexpectedStatusEvent(self.id, self._client_message.mex_header("statusevent"))
-        if self._client_message.mex_header("statussuccess") != "SUCCESS":
+        if self._client_message.mex_header("statussuccess") != MESH_STATUS_SUCCESS:
             raise UnsuccessfulStatus(self.id, self._client_message.mex_header("statussuccess"))
-        if self._client_message.mex_header("messagetype") != "DATA":
+        if self._client_message.mex_header("messagetype") != MESH_MESSAGE_TYPE_DATA:
             raise UnexpectedMessageType(self.id, self._client_message.mex_header("messagetype"))
 
     def acknowledge(self):
@@ -64,7 +68,7 @@ class UnexpectedStatusEvent(InvalidMeshHeader):
             header_name="statusevent",
             message_id=message_id,
             header_value=status_event_header,
-            expected_header_value="TRANSFER",
+            expected_header_value=MESH_STATUS_EVENT_TRANSFER,
         )
 
 
@@ -74,7 +78,7 @@ class UnsuccessfulStatus(InvalidMeshHeader):
             header_name="statussuccess",
             message_id=message_id,
             header_value=status_success_header,
-            expected_header_value="SUCCESS",
+            expected_header_value=MESH_STATUS_SUCCESS,
         )
 
 
@@ -84,5 +88,5 @@ class UnexpectedMessageType(InvalidMeshHeader):
             header_name="messagetype",
             message_id=message_id,
             header_value=message_type_header,
-            expected_header_value="DATA",
+            expected_header_value=MESH_MESSAGE_TYPE_DATA,
         )

@@ -1,6 +1,9 @@
 import pytest
 
 from s3mesh.mesh import (
+    MESH_MESSAGE_TYPE_DATA,
+    MESH_STATUS_EVENT_TRANSFER,
+    MESH_STATUS_SUCCESS,
     MeshMessage,
     UnexpectedMessageType,
     UnexpectedStatusEvent,
@@ -80,7 +83,7 @@ def test_exception_records_header_when_status_event_header_is_not_transfer():
         assert e.message_id == message_id
         assert e.header_value == status_event_header_value
         assert e.header_name == "statusevent"
-        assert e.expected_header_value == "TRANSFER"
+        assert e.expected_header_value == MESH_STATUS_EVENT_TRANSFER
 
 
 def test_throws_exception_when_status_success_header_is_not_success():
@@ -104,7 +107,7 @@ def test_exception_records_header_when_status_success_header_is_not_success():
         assert e.message_id == message_id
         assert e.header_value == status_success_header_value
         assert e.header_name == "statussuccess"
-        assert e.expected_header_value == "SUCCESS"
+        assert e.expected_header_value == MESH_STATUS_SUCCESS
 
 
 def test_throws_exception_when_message_type_header_is_not_data():
@@ -127,4 +130,4 @@ def test_exception_records_header_when_message_type_header_is_not_data():
         assert e.message_id == message_id
         assert e.header_value == message_type_header_value
         assert e.header_name == "messagetype"
-        assert e.expected_header_value == "DATA"
+        assert e.expected_header_value == MESH_MESSAGE_TYPE_DATA

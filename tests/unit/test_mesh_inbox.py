@@ -4,7 +4,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from s3mesh.mesh import MeshInbox
+from s3mesh.mesh import (
+    MESH_MESSAGE_TYPE_DATA,
+    MESH_STATUS_EVENT_TRANSFER,
+    MESH_STATUS_SUCCESS,
+    MeshInbox,
+)
 from tests.builders.common import a_string
 from tests.builders.mesh import build_mex_headers, mock_client_message
 
@@ -83,7 +88,8 @@ def test_calls_logger_with_a_warning_when_header_statussuccess_is_not_success():
 
     mock_warn.assert_called_with(
         f"Message {message_id}: "
-        f"Invalid MESH statussuccess header - expected: SUCCESS, instead got: {error_status}"
+        f"Invalid MESH statussuccess header - expected: {MESH_STATUS_SUCCESS}, "
+        f"instead got: {error_status}"
     )
 
 
@@ -104,7 +110,8 @@ def test_calls_logger_with_a_warning_when_header_messagetype_is_not_data():
 
     mock_warn.assert_called_with(
         f"Message {message_id}: "
-        f"Invalid MESH messagetype header - expected: DATA, instead got: {message_type}"
+        f"Invalid MESH messagetype header - expected: {MESH_MESSAGE_TYPE_DATA}, "
+        f"instead got: {message_type}"
     )
 
 
@@ -125,5 +132,6 @@ def test_calls_logger_with_a_warning_when_header_statusevent_is_not_transfer():
 
     mock_warn.assert_called_with(
         f"Message {message_id}: "
-        f"Invalid MESH statusevent header - expected: TRANSFER, instead got: {statusevent}"
+        f"Invalid MESH statusevent header - expected: {MESH_STATUS_EVENT_TRANSFER}, "
+        f"instead got: {statusevent}"
     )
