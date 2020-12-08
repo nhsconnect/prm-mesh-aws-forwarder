@@ -77,13 +77,14 @@ def test_exception_records_header_when_status_event_header_is_not_transfer():
         message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_header_value)
     )
 
-    try:
+    with pytest.raises(UnexpectedStatusEvent) as exception_info:
         MeshMessage(client_message)
-    except UnexpectedStatusEvent as e:
-        assert e.message_id == message_id
-        assert e.header_value == status_event_header_value
-        assert e.header_name == "statusevent"
-        assert e.expected_header_value == MESH_STATUS_EVENT_TRANSFER
+
+    exception = exception_info.value
+    assert exception.message_id == message_id
+    assert exception.header_value == status_event_header_value
+    assert exception.header_name == "statusevent"
+    assert exception.expected_header_value == MESH_STATUS_EVENT_TRANSFER
 
 
 def test_throws_exception_when_status_success_header_is_not_success():
@@ -101,13 +102,14 @@ def test_exception_records_header_when_status_success_header_is_not_success():
         mex_headers=build_mex_headers(status_success=status_success_header_value),
     )
 
-    try:
+    with pytest.raises(UnsuccessfulStatus) as exception_info:
         MeshMessage(client_message)
-    except UnsuccessfulStatus as e:
-        assert e.message_id == message_id
-        assert e.header_value == status_success_header_value
-        assert e.header_name == "statussuccess"
-        assert e.expected_header_value == MESH_STATUS_SUCCESS
+
+    exception = exception_info.value
+    assert exception.message_id == message_id
+    assert exception.header_value == status_success_header_value
+    assert exception.header_name == "statussuccess"
+    assert exception.expected_header_value == MESH_STATUS_SUCCESS
 
 
 def test_throws_exception_when_message_type_header_is_not_data():
@@ -124,10 +126,11 @@ def test_exception_records_header_when_message_type_header_is_not_data():
         message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header_value)
     )
 
-    try:
+    with pytest.raises(UnexpectedMessageType) as exception_info:
         MeshMessage(client_message)
-    except UnexpectedMessageType as e:
-        assert e.message_id == message_id
-        assert e.header_value == message_type_header_value
-        assert e.header_name == "messagetype"
-        assert e.expected_header_value == MESH_MESSAGE_TYPE_DATA
+
+    exception = exception_info.value
+    assert exception.message_id == message_id
+    assert exception.header_value == message_type_header_value
+    assert exception.header_name == "messagetype"
+    assert exception.expected_header_value == MESH_MESSAGE_TYPE_DATA
