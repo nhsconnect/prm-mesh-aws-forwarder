@@ -56,6 +56,8 @@ class MeshInbox:
                     f"Invalid MESH {e.header_name} header - expected: {e.expected_header_value}, "
                     f"instead got: {e.header_value}"
                 )
+            except MissingMeshHeader as e:
+                logger.warning(f"Message {e.message_id}: " f"Missing MESH {e.header_name} header")
 
 
 class InvalidMeshHeader(Exception):

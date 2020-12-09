@@ -41,12 +41,32 @@ def test_catches_exception():
     assert actual_messages == expected_messages
 
 
-def test_continues_reading_messages_when_one_of_them_throws_exception():
+def test_continues_reading_messages_when_one_of_them_has_invalid_mesh_header():
     mock_mesh_client = MagicMock()
     successful_message_1 = mock_client_message(message_id=a_string())
     successful_message_2 = mock_client_message(message_id=a_string())
     unsuccessful_message = mock_client_message(
         message_id=a_string(), mex_headers=build_mex_headers(status_success="ERROR")
+    )
+
+    client_messages = [successful_message_1, unsuccessful_message, successful_message_2]
+    mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    mesh_inbox = MeshInbox(mock_mesh_client)
+
+    actual_message_ids = [message.id for message in mesh_inbox.read_messages()]
+    expected_message_ids = [successful_message_1.id(), successful_message_2.id()]
+
+    assert actual_message_ids == expected_message_ids
+
+
+def test_continues_reading_messages_when_one_of_them_has_missing_mesh_header():
+    mock_mesh_client = MagicMock()
+    successful_message_1 = mock_client_message(message_id=a_string())
+    successful_message_2 = mock_client_message(message_id=a_string())
+    missing_mex_headers = build_mex_headers()
+    del missing_mex_headers["filename"]
+    unsuccessful_message = mock_client_message(
+        message_id=a_string(), mex_headers=missing_mex_headers
     )
 
     client_messages = [successful_message_1, unsuccessful_message, successful_message_2]
@@ -134,4 +154,27 @@ def test_calls_logger_with_a_warning_when_header_statusevent_is_not_transfer():
         f"Message {message_id}: "
         f"Invalid MESH statusevent header - expected: {MESH_STATUS_EVENT_TRANSFER}, "
         f"instead got: {statusevent}"
+    )
+
+
+@pytest.mark.parametrize(
+    "missing_header_name",
+    ["filename", "statustimestamp", "statusevent", "statussuccess", "messagetype"],
+)
+def test_calls_logger_with_a_warning_when_required_mex_header_is_missing(missing_header_name):
+    logger = logging.getLogger("s3mesh.mesh")
+    mock_mesh_client = MagicMock()
+    message_id = a_string()
+    mex_headers = build_mex_headers()
+    del mex_headers[missing_header_name]
+    unsuccessful_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+    client_messages = [unsuccessful_message]
+    mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    mesh_inbox = MeshInbox(mock_mesh_client)
+
+    with mock.patch.object(logger, "warning") as mock_warn:
+        list(mesh_inbox.read_messages())
+
+    mock_warn.assert_called_with(
+        f"Message {message_id}: " f"Missing MESH {missing_header_name} header"
     )
