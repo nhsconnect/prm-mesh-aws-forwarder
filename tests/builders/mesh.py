@@ -1,6 +1,11 @@
 from unittest.mock import MagicMock
 
-from s3mesh.mesh import MESH_MESSAGE_TYPE_DATA, MESH_STATUS_EVENT_TRANSFER, MESH_STATUS_SUCCESS
+from s3mesh.mesh import (
+    MESH_MESSAGE_TYPE_DATA,
+    MESH_STATUS_EVENT_TRANSFER,
+    MESH_STATUS_SUCCESS,
+    MeshInbox,
+)
 from tests.builders.common import a_datetime, a_string
 
 
@@ -40,3 +45,10 @@ def mock_client_message(**kwargs):
     message.id.return_value = kwargs.get("message_id", a_string())
     message.mex_header = lambda key: mex_headers[key]
     return message
+
+
+def mock_mesh_inbox(client_messages=None):
+    client_messages = [] if client_messages is None else client_messages
+    mock_mesh_client = MagicMock()
+    mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    return MeshInbox(mock_mesh_client)
