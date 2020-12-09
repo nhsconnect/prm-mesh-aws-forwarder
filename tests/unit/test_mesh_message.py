@@ -5,6 +5,7 @@ from s3mesh.mesh import (
     MESH_STATUS_EVENT_TRANSFER,
     MESH_STATUS_SUCCESS,
     MeshMessage,
+    MissingMeshHeader,
     UnexpectedMessageType,
     UnexpectedStatusEvent,
     UnsuccessfulStatus,
@@ -134,3 +135,22 @@ def test_exception_records_header_when_message_type_header_is_not_data():
     assert exception.header_value == message_type_header_value
     assert exception.header_name == "messagetype"
     assert exception.expected_header_value == MESH_MESSAGE_TYPE_DATA
+
+
+@pytest.mark.parametrize(
+    "missing_header_name",
+    ["filename", "statustimestamp", "statusevent", "statussuccess", "messagetype"],
+)
+def test_exception_raised_for_missing_headers(missing_header_name):
+    message_id = a_string()
+    mex_headers = build_mex_headers()
+    del mex_headers[missing_header_name]
+
+    client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+
+    with pytest.raises(MissingMeshHeader) as exception_info:
+        MeshMessage(client_message)
+
+    exception = exception_info.value
+    assert exception.message_id == message_id
+    assert exception.header_name == missing_header_name
