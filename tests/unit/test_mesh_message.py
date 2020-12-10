@@ -120,6 +120,51 @@ def test_throws_exception_when_message_type_header_is_not_data():
         MeshMessage(client_message)
 
 
+@pytest.mark.parametrize(
+    "status_success_value",
+    ["Success", "success", "SUCCESS", "sUccess"],
+)
+def test_ignores_case_in_status_success_type_header(status_success_value):
+    message_id = a_string()
+    client_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(status_success=status_success_value)
+    )
+    try:
+        MeshMessage(client_message)
+    except UnsuccessfulStatus:
+        pytest.fail("UnsuccessfulStatus was raised when it shouldn't have been")
+
+
+@pytest.mark.parametrize(
+    "status_event_value",
+    ["Transfer", "transfer", "TRANSFER", "tRansfer"],
+)
+def test_ignores_case_in_success_event_type_header(status_event_value):
+    message_id = a_string()
+    client_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_value)
+    )
+    try:
+        MeshMessage(client_message)
+    except UnexpectedStatusEvent:
+        pytest.fail("UnexpectedStatusEvent was raised when it shouldn't have been")
+
+
+@pytest.mark.parametrize(
+    "message_type_value",
+    ["Data", "data", "DATA", "dAta"],
+)
+def test_ignores_case_in_message_type_header(message_type_value):
+    message_id = a_string()
+    client_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_value)
+    )
+    try:
+        MeshMessage(client_message)
+    except UnexpectedMessageType:
+        pytest.fail("UnexpectedMessageType was raised when it shouldn't have been")
+
+
 def test_exception_records_header_when_message_type_header_is_not_data():
     message_id = a_string()
     message_type_header_value = "REPORT"

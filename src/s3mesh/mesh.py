@@ -28,11 +28,11 @@ class MeshMessage:
             raise MissingMeshHeader(self.id, header_name=header_name)
 
     def _validate_message(self):
-        if (header_value := self._read_header("statusevent")) != MESH_STATUS_EVENT_TRANSFER:
+        if (header_value := self._read_header("statusevent").upper()) != MESH_STATUS_EVENT_TRANSFER:
             raise UnexpectedStatusEvent(self.id, header_value)
-        if (header_value := self._read_header("statussuccess")) != MESH_STATUS_SUCCESS:
+        if (header_value := self._read_header("statussuccess").upper()) != MESH_STATUS_SUCCESS:
             raise UnsuccessfulStatus(self.id, header_value)
-        if (header_value := self._read_header("messagetype")) != MESH_MESSAGE_TYPE_DATA:
+        if (header_value := self._read_header("messagetype").upper()) != MESH_MESSAGE_TYPE_DATA:
             raise UnexpectedMessageType(self.id, header_value)
 
     def acknowledge(self):
