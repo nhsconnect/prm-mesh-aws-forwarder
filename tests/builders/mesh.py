@@ -9,6 +9,10 @@ from s3mesh.mesh import (
 from tests.builders.common import a_datetime, a_string
 
 
+def an_epoch_timestamp():
+    return a_datetime().timestamp()
+
+
 def a_timestamp():
     return a_datetime().strftime("%Y%m%d%H%M%S")
 
