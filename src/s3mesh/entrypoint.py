@@ -2,12 +2,12 @@ import logging
 from os import environ
 from os.path import join
 from signal import SIGINT, SIGTERM, signal
-from sys import stdout
 
 import boto3
 
 from s3mesh.config import ForwarderConfig
 from s3mesh.forwarder import MeshConfig, S3Config, build_forwarder_service
+from s3mesh.logging import JsonFormatter
 from s3mesh.secrets import SsmSecretManager
 
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -50,8 +50,17 @@ def build_forwarder_from_environment_variables(env_vars=environ):
     )
 
 
+def setup_logger():
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    formatter = JsonFormatter()
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
 def main():
-    logging.basicConfig(stream=stdout, level=logging.INFO, format=LOG_FORMAT)
+    setup_logger()
 
     forwarder_service = build_forwarder_from_environment_variables()
 
