@@ -69,6 +69,7 @@ def test_logs_message_progress():
     mock_s3_uploader = MagicMock()
     mock_mesh_message = MagicMock()
     mock_mesh_message.id = "123"
+    mock_mesh_message.file_name = "a_file.dat"
     mock_mesh_inbox.read_messages.return_value = iter([mock_mesh_message])
     forwarder = MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader)
 
@@ -77,7 +78,7 @@ def test_logs_message_progress():
 
     mock_info.assert_has_calls(
         [
-            call("Message received", extra={"messageId": "123"}),
+            call("Message received", extra={"messageId": "123", "fileName": "a_file.dat"}),
             call("Message uploaded", extra={"messageId": "123"}),
             call("Message acknowledged", extra={"messageId": "123"}),
         ],
