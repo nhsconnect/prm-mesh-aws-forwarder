@@ -20,11 +20,11 @@ class MeshToS3Forwarder:
     def forward_messages(self):
         messages: Iterable[MeshMessage] = self._inbox.read_messages()
         for message in messages:
-            logger.info(f"Message received: {message.id}")
+            logger.info("Message received", extra={"messageId": message.id})
             self._uploader.upload(message)
-            logger.info(f"Message uploaded: {message.id}")
+            logger.info("Message uploaded", extra={"messageId": message.id})
             message.acknowledge()
-            logger.info(f"Message acknowledged: {message.id}")
+            logger.info("Message acknowledged", extra={"messageId": message.id})
 
 
 class MeshToS3ForwarderService:
