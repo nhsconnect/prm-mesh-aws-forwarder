@@ -24,11 +24,11 @@ def test_calls_acknowledge_on_underlying_client_message():
 
 
 def test_exposes_message_id():
-    mocked_id = a_string()
-    client_message = mock_client_message(message_id=mocked_id)
+    message_id = a_string()
+    client_message = mock_client_message(message_id=message_id)
     message = MeshMessage(client_message)
 
-    assert message.id == mocked_id
+    assert message.id == message_id
 
 
 def test_calls_read_on_underlying_client_message():
@@ -74,10 +74,9 @@ def test_throws_exception_when_status_event_header_is_not_transfer():
 
 
 def test_exception_records_header_when_status_event_header_is_not_transfer():
-    message_id = a_string()
     status_event_header_value = "COLLECT"
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_header_value)
+        mex_headers=build_mex_headers(status_event=status_event_header_value)
     )
 
     message = MeshMessage(client_message)
@@ -86,7 +85,6 @@ def test_exception_records_header_when_status_event_header_is_not_transfer():
         message.validate()
 
     exception = exception_info.value
-    assert exception.message_id == message_id
     assert exception.header_value == status_event_header_value
     assert exception.header_name == "statusevent"
     assert exception.expected_header_value == MESH_STATUS_EVENT_TRANSFER
@@ -102,10 +100,8 @@ def test_throws_exception_when_status_success_header_is_not_success():
 
 
 def test_exception_records_header_when_status_success_header_is_not_success():
-    message_id = a_string()
     status_success_header_value = "ERROR"
     client_message = mock_client_message(
-        message_id=message_id,
         mex_headers=build_mex_headers(status_success=status_success_header_value),
     )
 
@@ -115,7 +111,6 @@ def test_exception_records_header_when_status_success_header_is_not_success():
         message.validate()
 
     exception = exception_info.value
-    assert exception.message_id == message_id
     assert exception.header_value == status_success_header_value
     assert exception.header_name == "statussuccess"
     assert exception.expected_header_value == MESH_STATUS_SUCCESS
@@ -131,10 +126,9 @@ def test_throws_exception_when_message_type_header_is_not_data():
 
 
 def test_exception_records_header_when_message_type_header_is_not_data():
-    message_id = a_string()
     message_type_header_value = "REPORT"
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header_value)
+        mex_headers=build_mex_headers(message_type=message_type_header_value)
     )
 
     message = MeshMessage(client_message)
@@ -143,7 +137,6 @@ def test_exception_records_header_when_message_type_header_is_not_data():
         message.validate()
 
     exception = exception_info.value
-    assert exception.message_id == message_id
     assert exception.header_value == message_type_header_value
     assert exception.header_name == "messagetype"
     assert exception.expected_header_value == MESH_MESSAGE_TYPE_DATA
@@ -154,9 +147,8 @@ def test_exception_records_header_when_message_type_header_is_not_data():
     ["Success", "success", "SUCCESS", "sUccess"],
 )
 def test_ignores_case_in_status_success_type_header(status_success_value):
-    message_id = a_string()
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(status_success=status_success_value)
+        mex_headers=build_mex_headers(status_success=status_success_value)
     )
     try:
         message = MeshMessage(client_message)
@@ -170,9 +162,8 @@ def test_ignores_case_in_status_success_type_header(status_success_value):
     ["Transfer", "transfer", "TRANSFER", "tRansfer"],
 )
 def test_ignores_case_in_success_event_type_header(status_event_value):
-    message_id = a_string()
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_value)
+        mex_headers=build_mex_headers(status_event=status_event_value)
     )
     try:
         message = MeshMessage(client_message)
@@ -186,9 +177,8 @@ def test_ignores_case_in_success_event_type_header(status_event_value):
     ["Data", "data", "DATA", "dAta"],
 )
 def test_ignores_case_in_message_type_header(message_type_value):
-    message_id = a_string()
     client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_value)
+        mex_headers=build_mex_headers(message_type=message_type_value)
     )
     try:
         message = MeshMessage(client_message)
@@ -202,11 +192,10 @@ def test_ignores_case_in_message_type_header(message_type_value):
     ["statusevent", "statussuccess", "messagetype"],
 )
 def test_exception_raised_for_missing_validation_headers(missing_header_name):
-    message_id = a_string()
     mex_headers = build_mex_headers()
     del mex_headers[missing_header_name]
 
-    client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+    client_message = mock_client_message(mex_headers=mex_headers)
 
     message = MeshMessage(client_message)
 
@@ -214,16 +203,14 @@ def test_exception_raised_for_missing_validation_headers(missing_header_name):
         message.validate()
 
     exception = exception_info.value
-    assert exception.message_id == message_id
     assert exception.header_name == missing_header_name
 
 
 def test_exception_raised_for_missing_file_name_header():
-    message_id = a_string()
     mex_headers = build_mex_headers()
     del mex_headers["filename"]
 
-    client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+    client_message = mock_client_message(mex_headers=mex_headers)
 
     message = MeshMessage(client_message)
 
@@ -235,11 +222,10 @@ def test_exception_raised_for_missing_file_name_header():
 
 
 def test_exception_raised_for_missing_status_timestamp_header():
-    message_id = a_string()
     mex_headers = build_mex_headers()
     del mex_headers["statustimestamp"]
 
-    client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+    client_message = mock_client_message(mex_headers=mex_headers)
 
     message = MeshMessage(client_message)
 

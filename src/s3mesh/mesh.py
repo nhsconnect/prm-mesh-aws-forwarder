@@ -20,7 +20,7 @@ class MeshMessage:
         try:
             return self._client_message.mex_header(header_name)
         except KeyError:
-            raise MissingMeshHeader(self.id, header_name=header_name)
+            raise MissingMeshHeader(header_name=header_name)
 
     @property
     def file_name(self) -> str:
@@ -33,11 +33,11 @@ class MeshMessage:
 
     def validate(self):
         if (header_value := self._read_header("statusevent").upper()) != MESH_STATUS_EVENT_TRANSFER:
-            raise UnexpectedStatusEvent(self.id, header_value)
+            raise UnexpectedStatusEvent(header_value)
         if (header_value := self._read_header("statussuccess").upper()) != MESH_STATUS_SUCCESS:
-            raise UnsuccessfulStatus(self.id, header_value)
+            raise UnsuccessfulStatus(header_value)
         if (header_value := self._read_header("messagetype").upper()) != MESH_MESSAGE_TYPE_DATA:
-            raise UnexpectedMessageType(self.id, header_value)
+            raise UnexpectedMessageType(header_value)
 
     def acknowledge(self):
         self._client_message.acknowledge()
@@ -56,40 +56,34 @@ class MeshInbox:
 
 
 class InvalidMeshHeader(Exception):
-    def __init__(
-        self, header_name: str, message_id: str, header_value: str, expected_header_value: str
-    ):
-        self.message_id = message_id
+    def __init__(self, header_name: str, header_value: str, expected_header_value: str):
         self.header_name = header_name
         self.header_value = header_value
         self.expected_header_value = expected_header_value
 
 
 class UnexpectedStatusEvent(InvalidMeshHeader):
-    def __init__(self, message_id, status_event_header):
+    def __init__(self, status_event_header):
         super().__init__(
             header_name="statusevent",
-            message_id=message_id,
             header_value=status_event_header,
             expected_header_value=MESH_STATUS_EVENT_TRANSFER,
         )
 
 
 class UnsuccessfulStatus(InvalidMeshHeader):
-    def __init__(self, message_id, status_success_header):
+    def __init__(self, status_success_header):
         super().__init__(
             header_name="statussuccess",
-            message_id=message_id,
             header_value=status_success_header,
             expected_header_value=MESH_STATUS_SUCCESS,
         )
 
 
 class UnexpectedMessageType(InvalidMeshHeader):
-    def __init__(self, message_id, message_type_header):
+    def __init__(self, message_type_header):
         super().__init__(
             header_name="messagetype",
-            message_id=message_id,
             header_value=message_type_header,
             expected_header_value=MESH_MESSAGE_TYPE_DATA,
         )
@@ -98,8 +92,6 @@ class UnexpectedMessageType(InvalidMeshHeader):
 class MissingMeshHeader(Exception):
     def __init__(
         self,
-        message_id: str,
         header_name: str,
     ):
-        self.message_id = message_id
         self.header_name = header_name

@@ -12,7 +12,6 @@ from tests.builders.common import a_string
 def _an_invalid_header_exception(**kwargs):
     return InvalidMeshHeader(
         header_name=kwargs.get("header_name", a_string()),
-        message_id=kwargs.get("message_id", a_string()),
         header_value=kwargs.get("header_value", a_string()),
         expected_header_value=kwargs.get("expected_header_value", a_string()),
     )
@@ -20,7 +19,6 @@ def _an_invalid_header_exception(**kwargs):
 
 def _a_missing_header_exception(**kwargs):
     return MissingMeshHeader(
-        message_id=kwargs.get("message_id", a_string()),
         header_name=kwargs.get("header_name", a_string()),
     )
 
@@ -143,7 +141,6 @@ def test_calls_logger_with_a_warning_when_message_has_invalid_header():
     forwarder = MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader)
     mock_mesh_message.validate.side_effect = _an_invalid_header_exception(
         header_name="fruit_header",
-        message_id="abc",
         header_value="banana",
         expected_header_value="mango",
     )
@@ -205,7 +202,6 @@ def test_calls_logger_with_a_warning_when_message_is_missing_header():
     forwarder = MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader)
     mock_mesh_message.validate.side_effect = _a_missing_header_exception(
         header_name="fruit_header",
-        message_id="abc",
     )
     logger = logging.getLogger("s3mesh.forwarder")
 

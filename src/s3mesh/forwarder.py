@@ -23,7 +23,6 @@ class MeshToS3Forwarder:
             self._process_message(message)
 
     def _process_message(self, message):
-
         try:
             logger.info(
                 "Message received", extra={"messageId": message.id, "fileName": message.file_name}
@@ -34,10 +33,10 @@ class MeshToS3Forwarder:
             message.acknowledge()
             logger.info("Message acknowledged", extra={"messageId": message.id})
         except MissingMeshHeader as e:
-            logger.warning(f"Message {e.message_id}: " f"Missing MESH {e.header_name} header")
+            logger.warning(f"Message {message.id}: " f"Missing MESH {e.header_name} header")
         except InvalidMeshHeader as e:
             logger.warning(
-                f"Message {e.message_id}: "
+                f"Message {message.id}: "
                 f"Invalid MESH {e.header_name} header - expected: {e.expected_header_value}, "
                 f"instead got: {e.header_value}"
             )
