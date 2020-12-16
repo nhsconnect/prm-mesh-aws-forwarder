@@ -67,8 +67,10 @@ def test_exposes_date_delivered():
 def test_throws_exception_when_status_event_header_is_not_transfer():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_event="COLLECT"))
 
+    message = MeshMessage(client_message)
+
     with pytest.raises(UnexpectedStatusEvent):
-        MeshMessage(client_message)
+        message.validate()
 
 
 def test_exception_records_header_when_status_event_header_is_not_transfer():
@@ -78,8 +80,10 @@ def test_exception_records_header_when_status_event_header_is_not_transfer():
         message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_header_value)
     )
 
+    message = MeshMessage(client_message)
+
     with pytest.raises(UnexpectedStatusEvent) as exception_info:
-        MeshMessage(client_message)
+        message.validate()
 
     exception = exception_info.value
     assert exception.message_id == message_id
@@ -91,8 +95,10 @@ def test_exception_records_header_when_status_event_header_is_not_transfer():
 def test_throws_exception_when_status_success_header_is_not_success():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_success="ERROR"))
 
+    message = MeshMessage(client_message)
+
     with pytest.raises(UnsuccessfulStatus):
-        MeshMessage(client_message)
+        message.validate()
 
 
 def test_exception_records_header_when_status_success_header_is_not_success():
@@ -103,8 +109,10 @@ def test_exception_records_header_when_status_success_header_is_not_success():
         mex_headers=build_mex_headers(status_success=status_success_header_value),
     )
 
+    message = MeshMessage(client_message)
+
     with pytest.raises(UnsuccessfulStatus) as exception_info:
-        MeshMessage(client_message)
+        message.validate()
 
     exception = exception_info.value
     assert exception.message_id == message_id
@@ -116,8 +124,29 @@ def test_exception_records_header_when_status_success_header_is_not_success():
 def test_throws_exception_when_message_type_header_is_not_data():
     client_message = mock_client_message(mex_headers=build_mex_headers(message_type="REPORT"))
 
+    message = MeshMessage(client_message)
+
     with pytest.raises(UnexpectedMessageType):
-        MeshMessage(client_message)
+        message.validate()
+
+
+def test_exception_records_header_when_message_type_header_is_not_data():
+    message_id = a_string()
+    message_type_header_value = "REPORT"
+    client_message = mock_client_message(
+        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header_value)
+    )
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(UnexpectedMessageType) as exception_info:
+        message.validate()
+
+    exception = exception_info.value
+    assert exception.message_id == message_id
+    assert exception.header_value == message_type_header_value
+    assert exception.header_name == "messagetype"
+    assert exception.expected_header_value == MESH_MESSAGE_TYPE_DATA
 
 
 @pytest.mark.parametrize(
@@ -130,7 +159,8 @@ def test_ignores_case_in_status_success_type_header(status_success_value):
         message_id=message_id, mex_headers=build_mex_headers(status_success=status_success_value)
     )
     try:
-        MeshMessage(client_message)
+        message = MeshMessage(client_message)
+        message.validate()
     except UnsuccessfulStatus:
         pytest.fail("UnsuccessfulStatus was raised when it shouldn't have been")
 
@@ -145,7 +175,8 @@ def test_ignores_case_in_success_event_type_header(status_event_value):
         message_id=message_id, mex_headers=build_mex_headers(status_event=status_event_value)
     )
     try:
-        MeshMessage(client_message)
+        message = MeshMessage(client_message)
+        message.validate()
     except UnexpectedStatusEvent:
         pytest.fail("UnexpectedStatusEvent was raised when it shouldn't have been")
 
@@ -160,42 +191,60 @@ def test_ignores_case_in_message_type_header(message_type_value):
         message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_value)
     )
     try:
-        MeshMessage(client_message)
+        message = MeshMessage(client_message)
+        message.validate()
     except UnexpectedMessageType:
         pytest.fail("UnexpectedMessageType was raised when it shouldn't have been")
 
 
-def test_exception_records_header_when_message_type_header_is_not_data():
-    message_id = a_string()
-    message_type_header_value = "REPORT"
-    client_message = mock_client_message(
-        message_id=message_id, mex_headers=build_mex_headers(message_type=message_type_header_value)
-    )
-
-    with pytest.raises(UnexpectedMessageType) as exception_info:
-        MeshMessage(client_message)
-
-    exception = exception_info.value
-    assert exception.message_id == message_id
-    assert exception.header_value == message_type_header_value
-    assert exception.header_name == "messagetype"
-    assert exception.expected_header_value == MESH_MESSAGE_TYPE_DATA
-
-
 @pytest.mark.parametrize(
     "missing_header_name",
-    ["filename", "statustimestamp", "statusevent", "statussuccess", "messagetype"],
+    ["statusevent", "statussuccess", "messagetype"],
 )
-def test_exception_raised_for_missing_headers(missing_header_name):
+def test_exception_raised_for_missing_validation_headers(missing_header_name):
     message_id = a_string()
     mex_headers = build_mex_headers()
     del mex_headers[missing_header_name]
 
     client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
 
+    message = MeshMessage(client_message)
+
     with pytest.raises(MissingMeshHeader) as exception_info:
-        MeshMessage(client_message)
+        message.validate()
 
     exception = exception_info.value
     assert exception.message_id == message_id
     assert exception.header_name == missing_header_name
+
+
+def test_exception_raised_for_missing_file_name_header():
+    message_id = a_string()
+    mex_headers = build_mex_headers()
+    del mex_headers["filename"]
+
+    client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(MissingMeshHeader) as exception_info:
+        _ = message.file_name
+
+    exception = exception_info.value
+    assert exception.header_name == "filename"
+
+
+def test_exception_raised_for_missing_status_timestamp_header():
+    message_id = a_string()
+    mex_headers = build_mex_headers()
+    del mex_headers["statustimestamp"]
+
+    client_message = mock_client_message(message_id=message_id, mex_headers=mex_headers)
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(MissingMeshHeader) as exception_info:
+        _ = message.date_delivered
+
+    exception = exception_info.value
+    assert exception.header_name == "statustimestamp"

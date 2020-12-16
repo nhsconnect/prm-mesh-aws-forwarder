@@ -6,7 +6,7 @@ from typing import Iterable, Optional
 import boto3
 import mesh_client
 
-from s3mesh.mesh import MeshInbox, MeshMessage
+from s3mesh.mesh import InvalidMeshHeader, MeshInbox, MeshMessage, MissingMeshHeader
 from s3mesh.s3 import S3Uploader
 
 logger = logging.getLogger(__name__)
@@ -20,13 +20,27 @@ class MeshToS3Forwarder:
     def forward_messages(self):
         messages: Iterable[MeshMessage] = self._inbox.read_messages()
         for message in messages:
+            self._process_message(message)
+
+    def _process_message(self, message):
+
+        try:
             logger.info(
                 "Message received", extra={"messageId": message.id, "fileName": message.file_name}
             )
+            message.validate()
             self._uploader.upload(message)
             logger.info("Message uploaded", extra={"messageId": message.id})
             message.acknowledge()
             logger.info("Message acknowledged", extra={"messageId": message.id})
+        except MissingMeshHeader as e:
+            logger.warning(f"Message {e.message_id}: " f"Missing MESH {e.header_name} header")
+        except InvalidMeshHeader as e:
+            logger.warning(
+                f"Message {e.message_id}: "
+                f"Invalid MESH {e.header_name} header - expected: {e.expected_header_value}, "
+                f"instead got: {e.header_value}"
+            )
 
 
 class MeshToS3ForwarderService:
