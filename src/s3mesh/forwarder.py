@@ -38,6 +38,7 @@ class MeshToS3Forwarder:
     def _process_message(self, message, observation):
         try:
             observation.add_field("sender", message.sender)
+            observation.add_field("recipient", message.recipient)
             observation.add_field("fileName", message.file_name)
             message.validate()
             self._uploader.upload(message, observation)

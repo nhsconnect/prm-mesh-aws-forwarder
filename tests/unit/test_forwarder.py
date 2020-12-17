@@ -31,6 +31,7 @@ def _a_mock_message(**kwargs):
     message.id = kwargs.get("message_id", a_string())
     message.file_name = kwargs.get("file_name", a_string())
     message.sender = kwargs.get("sender", a_string())
+    message.recipient = kwargs.get("recipient", a_string())
     message.validate.side_effect = kwargs.get("validation_error", None)
     return message
 
@@ -209,7 +210,9 @@ def test_records_message_progress():
 
     forwarder = _build_forwarder(
         incoming_messages=[
-            _a_mock_message(message_id="123", sender="mesh123", file_name="a_file.dat")
+            _a_mock_message(
+                message_id="123", sender="mesh123", recipient="mesh456", file_name="a_file.dat"
+            )
         ],
         probe=probe,
     )
@@ -221,6 +224,7 @@ def test_records_message_progress():
         [
             call.add_field("messageId", "123"),
             call.add_field("sender", "mesh123"),
+            call.add_field("recipient", "mesh456"),
             call.add_field("fileName", "a_file.dat"),
             call.finish(),
         ],
@@ -238,6 +242,7 @@ def test_records_error_when_message_is_missing_header():
             _a_mock_message(
                 message_id="abc",
                 sender="mesh123",
+                recipient="mesh456",
                 file_name="a_file.dat",
                 validation_error=_a_missing_header_exception(
                     header_name="fruit_header",
@@ -254,6 +259,7 @@ def test_records_error_when_message_is_missing_header():
         [
             call.add_field("messageId", "abc"),
             call.add_field("sender", "mesh123"),
+            call.add_field("recipient", "mesh456"),
             call.add_field("fileName", "a_file.dat"),
             call.add_field("error", MISSING_MESH_HEADER_ERROR),
             call.add_field("missingHeaderName", "fruit_header"),
@@ -274,6 +280,7 @@ def test_records_error_when_message_has_invalid_header():
                 message_id="abc",
                 file_name="a_file.dat",
                 sender="mesh123",
+                recipient="mesh456",
                 validation_error=_an_invalid_header_exception(
                     header_name="fruit_header",
                     header_value="banana",
@@ -291,6 +298,7 @@ def test_records_error_when_message_has_invalid_header():
         [
             call.add_field("messageId", "abc"),
             call.add_field("sender", "mesh123"),
+            call.add_field("recipient", "mesh456"),
             call.add_field("fileName", "a_file.dat"),
             call.add_field("error", INVALID_MESH_HEADER_ERROR),
             call.add_field("expectedHeaderValue", "mango"),

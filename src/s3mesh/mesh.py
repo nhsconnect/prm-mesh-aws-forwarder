@@ -35,6 +35,10 @@ class MeshMessage:
     def sender(self) -> str:
         return self._read_header("from")
 
+    @property
+    def recipient(self) -> str:
+        return self._read_header("to")
+
     def validate(self):
         if (header_value := self._read_header("statusevent").upper()) != MESH_STATUS_EVENT_TRANSFER:
             raise UnexpectedStatusEvent(header_value)

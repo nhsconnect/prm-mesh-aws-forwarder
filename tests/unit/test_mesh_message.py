@@ -72,6 +72,14 @@ def test_exposes_sender():
     assert message.sender == sender
 
 
+def test_exposes_recipient():
+    recipient = a_string()
+    client_message = mock_client_message(mex_headers=build_mex_headers(to=recipient))
+    message = MeshMessage(client_message)
+
+    assert message.recipient == recipient
+
+
 def test_throws_exception_when_status_event_header_is_not_transfer():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_event="COLLECT"))
 
@@ -257,3 +265,18 @@ def test_exception_raised_for_missing_from_header():
 
     exception = exception_info.value
     assert exception.header_name == "from"
+
+
+def test_exception_raised_for_missing_to_header():
+    mex_headers = build_mex_headers()
+    del mex_headers["to"]
+
+    client_message = mock_client_message(mex_headers=mex_headers)
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(MissingMeshHeader) as exception_info:
+        _ = message.recipient
+
+    exception = exception_info.value
+    assert exception.header_name == "to"
