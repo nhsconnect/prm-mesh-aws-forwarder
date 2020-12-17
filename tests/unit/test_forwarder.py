@@ -2,7 +2,12 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from s3mesh.forwarder import MeshToS3Forwarder
+from s3mesh.forwarder import (
+    FORWARD_MESSAGE_EVENT,
+    INVALID_MESH_HEADER_ERROR,
+    MISSING_MESH_HEADER_ERROR,
+    MeshToS3Forwarder,
+)
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
 from tests.builders.common import a_string
 
@@ -190,7 +195,7 @@ def test_records_message_progress():
 
     forwarder.forward_messages()
 
-    probe.start_observation.assert_called_once_with("FORWARD_MESSAGE")
+    probe.start_observation.assert_called_once_with(FORWARD_MESSAGE_EVENT)
     observation.assert_has_calls(
         [
             call.add_field("messageId", "123"),
@@ -221,12 +226,12 @@ def test_records_error_when_message_is_missing_header():
 
     forwarder.forward_messages()
 
-    probe.start_observation.assert_called_once_with("FORWARD_MESSAGE")
+    probe.start_observation.assert_called_once_with(FORWARD_MESSAGE_EVENT)
     observation.assert_has_calls(
         [
             call.add_field("messageId", "abc"),
             call.add_field("fileName", "a_file.dat"),
-            call.add_field("error", "MISSING_MESH_HEADER"),
+            call.add_field("error", MISSING_MESH_HEADER_ERROR),
             call.add_field("missingHeaderName", "fruit_header"),
             call.finish(),
         ],
@@ -256,12 +261,12 @@ def test_records_error_when_message_has_invalid_header():
 
     forwarder.forward_messages()
 
-    probe.start_observation.assert_called_once_with("FORWARD_MESSAGE")
+    probe.start_observation.assert_called_once_with(FORWARD_MESSAGE_EVENT)
     observation.assert_has_calls(
         [
             call.add_field("messageId", "abc"),
             call.add_field("fileName", "a_file.dat"),
-            call.add_field("error", "INVALID_MESH_HEADER"),
+            call.add_field("error", INVALID_MESH_HEADER_ERROR),
             call.add_field("expectedHeaderValue", "mango"),
             call.add_field("receivedHeaderValue", "banana"),
             call.finish(),

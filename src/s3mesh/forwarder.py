@@ -10,6 +10,10 @@ from s3mesh.mesh import InvalidMeshHeader, MeshInbox, MeshMessage, MissingMeshHe
 from s3mesh.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
 
+INVALID_MESH_HEADER_ERROR = "INVALID_MESH_HEADER"
+MISSING_MESH_HEADER_ERROR = "MISSING_MESH_HEADER"
+FORWARD_MESSAGE_EVENT = "FORWARD_MESSAGE"
+
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +29,7 @@ class MeshToS3Forwarder:
             self._process_message(message)
 
     def _process_message(self, message):
-        observation = self._probe.start_observation("FORWARD_MESSAGE")
+        observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)
         observation.add_field("messageId", message.id)
 
         try:
@@ -34,10 +38,10 @@ class MeshToS3Forwarder:
             self._uploader.upload(message)
             message.acknowledge()
         except MissingMeshHeader as e:
-            observation.add_field("error", "MISSING_MESH_HEADER")
+            observation.add_field("error", MISSING_MESH_HEADER_ERROR)
             observation.add_field("missingHeaderName", e.header_name)
         except InvalidMeshHeader as e:
-            observation.add_field("error", "INVALID_MESH_HEADER")
+            observation.add_field("error", INVALID_MESH_HEADER_ERROR)
             observation.add_field("expectedHeaderValue", e.expected_header_value)
             observation.add_field("receivedHeaderValue", e.header_value)
 
