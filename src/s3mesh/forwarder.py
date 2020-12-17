@@ -25,7 +25,7 @@ class MeshToS3Forwarder:
             self._process_message(message)
 
     def _process_message(self, message):
-        observation = self._probe.start_observation()
+        observation = self._probe.start_observation("FORWARD_MESSAGE")
         observation.add_field("messageId", message.id)
 
         try:
@@ -39,7 +39,7 @@ class MeshToS3Forwarder:
         except InvalidMeshHeader as e:
             observation.add_field("error", "INVALID_MESH_HEADER")
             observation.add_field("expectedHeaderValue", e.expected_header_value)
-            observation.add_field("recievedHeaderValue", e.header_value)
+            observation.add_field("receivedHeaderValue", e.header_value)
 
         observation.finish()
 

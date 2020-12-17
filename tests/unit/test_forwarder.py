@@ -190,6 +190,7 @@ def test_records_message_progress():
 
     forwarder.forward_messages()
 
+    probe.start_observation.assert_called_once_with("FORWARD_MESSAGE")
     observation.assert_has_calls(
         [
             call.add_field("messageId", "123"),
@@ -220,6 +221,7 @@ def test_records_error_when_message_is_missing_header():
 
     forwarder.forward_messages()
 
+    probe.start_observation.assert_called_once_with("FORWARD_MESSAGE")
     observation.assert_has_calls(
         [
             call.add_field("messageId", "abc"),
@@ -254,13 +256,14 @@ def test_records_error_when_message_has_invalid_header():
 
     forwarder.forward_messages()
 
+    probe.start_observation.assert_called_once_with("FORWARD_MESSAGE")
     observation.assert_has_calls(
         [
             call.add_field("messageId", "abc"),
             call.add_field("fileName", "a_file.dat"),
             call.add_field("error", "INVALID_MESH_HEADER"),
             call.add_field("expectedHeaderValue", "mango"),
-            call.add_field("recievedHeaderValue", "banana"),
+            call.add_field("receivedHeaderValue", "banana"),
             call.finish(),
         ],
         any_order=False,
