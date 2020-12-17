@@ -1,6 +1,4 @@
-import logging
-from unittest import mock
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call
 
 import pytest
 
@@ -34,9 +32,10 @@ def _a_mock_message(**kwargs):
 def _build_forwarder(**kwargs):
     mock_mesh_inbox = kwargs.get("mesh_inbox", MagicMock())
     mock_s3_uploader = kwargs.get("s3_uploader", MagicMock())
+    mock_probe = kwargs.get("probe", MagicMock())
     mock_mesh_inbox.read_messages.return_value = iter(kwargs.get("incoming_messages", []))
 
-    return MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader)
+    return MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader, mock_probe)
 
 
 def test_validates_message():
@@ -107,26 +106,6 @@ def test_acknowledges_multiple_message():
         mock_message.acknowledge.assert_called_once()
 
 
-def test_logs_message_progress():
-    logger = logging.getLogger("s3mesh.forwarder")
-
-    forwarder = _build_forwarder(
-        incoming_messages=[_a_mock_message(message_id="123", file_name="a_file.dat")]
-    )
-
-    with patch.object(logger, "info") as mock_info:
-        forwarder.forward_messages()
-
-    mock_info.assert_has_calls(
-        [
-            call("Message received", extra={"messageId": "123", "fileName": "a_file.dat"}),
-            call("Message uploaded", extra={"messageId": "123"}),
-            call("Message acknowledged", extra={"messageId": "123"}),
-        ],
-        any_order=False,
-    )
-
-
 def test_catches_invalid_header_error():
     forwarder = _build_forwarder(
         incoming_messages=[_a_mock_message(validation_error=_an_invalid_header_exception())]
@@ -136,30 +115,6 @@ def test_catches_invalid_header_error():
         forwarder.forward_messages()
     except InvalidMeshHeader:
         pytest.fail("InvalidMeshHeader was raised when it shouldn't have been")
-
-
-def test_calls_logger_with_a_warning_when_message_has_invalid_header():
-    forwarder = _build_forwarder(
-        incoming_messages=[
-            _a_mock_message(
-                message_id="abc",
-                validation_error=_an_invalid_header_exception(
-                    header_name="fruit_header",
-                    header_value="banana",
-                    expected_header_value="mango",
-                ),
-            )
-        ]
-    )
-
-    logger = logging.getLogger("s3mesh.forwarder")
-
-    with mock.patch.object(logger, "warning") as mock_warn:
-        forwarder.forward_messages()
-
-    mock_warn.assert_called_with(
-        "Message abc: Invalid MESH fruit_header header - expected: mango, instead got: banana"
-    )
 
 
 def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header():
@@ -195,26 +150,6 @@ def test_catches_missing_header_error():
         pytest.fail("MissingMeshHeader was raised when it shouldn't have been")
 
 
-def test_calls_logger_with_a_warning_when_message_is_missing_header():
-    forwarder = _build_forwarder(
-        incoming_messages=[
-            _a_mock_message(
-                message_id="abc",
-                validation_error=_a_missing_header_exception(
-                    header_name="fruit_header",
-                ),
-            )
-        ]
-    )
-
-    logger = logging.getLogger("s3mesh.forwarder")
-
-    with mock.patch.object(logger, "warning") as mock_warn:
-        forwarder.forward_messages()
-
-    mock_warn.assert_called_with("Message abc: Missing MESH fruit_header header")
-
-
 def test_continues_uploading_messages_when_one_of_them_has_missing_mesh_header():
     successful_message_1 = _a_mock_message()
     successful_message_2 = _a_mock_message()
@@ -242,3 +177,91 @@ def test_does_not_catch_generic_exception():
 
     with pytest.raises(Exception):
         forwarder.forward_messages()
+
+
+def test_records_message_progress():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    forwarder = _build_forwarder(
+        incoming_messages=[_a_mock_message(message_id="123", file_name="a_file.dat")], probe=probe
+    )
+
+    forwarder.forward_messages()
+
+    observation.assert_has_calls(
+        [
+            call.add_field("messageId", "123"),
+            call.add_field("fileName", "a_file.dat"),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_records_error_when_message_is_missing_header():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    forwarder = _build_forwarder(
+        incoming_messages=[
+            _a_mock_message(
+                message_id="abc",
+                file_name="a_file.dat",
+                validation_error=_a_missing_header_exception(
+                    header_name="fruit_header",
+                ),
+            )
+        ],
+        probe=probe,
+    )
+
+    forwarder.forward_messages()
+
+    observation.assert_has_calls(
+        [
+            call.add_field("messageId", "abc"),
+            call.add_field("fileName", "a_file.dat"),
+            call.add_field("error", "MISSING_MESH_HEADER"),
+            call.add_field("missingHeaderName", "fruit_header"),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_records_error_when_message_has_invalid_header():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    forwarder = _build_forwarder(
+        incoming_messages=[
+            _a_mock_message(
+                message_id="abc",
+                file_name="a_file.dat",
+                validation_error=_an_invalid_header_exception(
+                    header_name="fruit_header",
+                    header_value="banana",
+                    expected_header_value="mango",
+                ),
+            )
+        ],
+        probe=probe,
+    )
+
+    forwarder.forward_messages()
+
+    observation.assert_has_calls(
+        [
+            call.add_field("messageId", "abc"),
+            call.add_field("fileName", "a_file.dat"),
+            call.add_field("error", "INVALID_MESH_HEADER"),
+            call.add_field("expectedHeaderValue", "mango"),
+            call.add_field("recievedHeaderValue", "banana"),
+            call.finish(),
+        ],
+        any_order=False,
+    )

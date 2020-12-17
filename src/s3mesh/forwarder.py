@@ -7,15 +7,17 @@ import boto3
 import mesh_client
 
 from s3mesh.mesh import InvalidMeshHeader, MeshInbox, MeshMessage, MissingMeshHeader
+from s3mesh.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
 
 logger = logging.getLogger(__name__)
 
 
 class MeshToS3Forwarder:
-    def __init__(self, inbox: MeshInbox, uploader: S3Uploader):
+    def __init__(self, inbox: MeshInbox, uploader: S3Uploader, probe: LoggingProbe):
         self._inbox = inbox
         self._uploader = uploader
+        self._probe = probe
 
     def forward_messages(self):
         messages: Iterable[MeshMessage] = self._inbox.read_messages()
@@ -23,23 +25,23 @@ class MeshToS3Forwarder:
             self._process_message(message)
 
     def _process_message(self, message):
+        observation = self._probe.start_observation()
+        observation.add_field("messageId", message.id)
+
         try:
-            logger.info(
-                "Message received", extra={"messageId": message.id, "fileName": message.file_name}
-            )
+            observation.add_field("fileName", message.file_name)
             message.validate()
             self._uploader.upload(message)
-            logger.info("Message uploaded", extra={"messageId": message.id})
             message.acknowledge()
-            logger.info("Message acknowledged", extra={"messageId": message.id})
         except MissingMeshHeader as e:
-            logger.warning(f"Message {message.id}: " f"Missing MESH {e.header_name} header")
+            observation.add_field("error", "MISSING_MESH_HEADER")
+            observation.add_field("missingHeaderName", e.header_name)
         except InvalidMeshHeader as e:
-            logger.warning(
-                f"Message {message.id}: "
-                f"Invalid MESH {e.header_name} header - expected: {e.expected_header_value}, "
-                f"instead got: {e.header_value}"
-            )
+            observation.add_field("error", "INVALID_MESH_HEADER")
+            observation.add_field("expectedHeaderValue", e.expected_header_value)
+            observation.add_field("recievedHeaderValue", e.header_value)
+
+        observation.finish()
 
 
 class MeshToS3ForwarderService:
@@ -94,5 +96,5 @@ def build_forwarder_service(
         verify=mesh_config.ca_cert_path,
     )
     inbox = MeshInbox(mesh)
-    forwarder = MeshToS3Forwarder(inbox, uploader)
+    forwarder = MeshToS3Forwarder(inbox, uploader, LoggingProbe())
     return MeshToS3ForwarderService(forwarder, poll_frequency_sec)
