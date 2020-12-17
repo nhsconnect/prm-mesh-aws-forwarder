@@ -58,12 +58,17 @@ def test_validates_message():
 def test_forwards_message():
     mock_message = _a_mock_message()
     mock_uploader = MagicMock()
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(incoming_messages=[mock_message], s3_uploader=mock_uploader)
+    forwarder = _build_forwarder(
+        incoming_messages=[mock_message], s3_uploader=mock_uploader, probe=probe
+    )
 
     forwarder.forward_messages()
 
-    mock_uploader.upload.assert_called_once_with(mock_message)
+    mock_uploader.upload.assert_called_once_with(mock_message, observation)
 
 
 def test_acknowledges_message():
@@ -82,17 +87,22 @@ def test_forwards_multiple_messages():
     mock_message_one = _a_mock_message()
     mock_message_two = _a_mock_message()
     mock_uploader = MagicMock()
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
-        incoming_messages=[mock_message_one, mock_message_two], s3_uploader=mock_uploader
+        incoming_messages=[mock_message_one, mock_message_two],
+        s3_uploader=mock_uploader,
+        probe=probe,
     )
 
     forwarder.forward_messages()
 
     mock_uploader.upload.assert_has_calls(
         [
-            call(mock_message_one),
-            call(mock_message_two),
+            call(mock_message_one, observation),
+            call(mock_message_two, observation),
         ]
     )
 
@@ -126,20 +136,23 @@ def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header()
     successful_message_1 = _a_mock_message()
     successful_message_2 = _a_mock_message()
     unsuccessful_message = _a_mock_message(validation_error=_an_invalid_header_exception())
-
     mock_uploader = MagicMock()
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
         incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
         s3_uploader=mock_uploader,
+        probe=probe,
     )
 
     forwarder.forward_messages()
 
     mock_uploader.upload.assert_has_calls(
         [
-            call(successful_message_1),
-            call(successful_message_2),
+            call(successful_message_1, observation),
+            call(successful_message_2, observation),
         ]
     )
 
@@ -161,18 +174,22 @@ def test_continues_uploading_messages_when_one_of_them_has_missing_mesh_header()
     unsuccessful_message = _a_mock_message(validation_error=_a_missing_header_exception())
 
     mock_uploader = MagicMock()
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
         incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
         s3_uploader=mock_uploader,
+        probe=probe,
     )
 
     forwarder.forward_messages()
 
     mock_uploader.upload.assert_has_calls(
         [
-            call(successful_message_1),
-            call(successful_message_2),
+            call(successful_message_1, observation),
+            call(successful_message_2, observation),
         ]
     )
 

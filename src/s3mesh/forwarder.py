@@ -39,7 +39,7 @@ class MeshToS3Forwarder:
         try:
             observation.add_field("fileName", message.file_name)
             message.validate()
-            self._uploader.upload(message)
+            self._uploader.upload(message, observation)
             message.acknowledge()
         except MissingMeshHeader as e:
             observation.add_field("error", MISSING_MESH_HEADER_ERROR)
