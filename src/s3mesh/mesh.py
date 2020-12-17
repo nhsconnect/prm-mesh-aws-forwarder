@@ -31,6 +31,10 @@ class MeshMessage:
         date_header = self._read_header("statustimestamp")
         return datetime.strptime(date_header, "%Y%m%d%H%M%S")
 
+    @property
+    def sender(self) -> str:
+        return self._read_header("from")
+
     def validate(self):
         if (header_value := self._read_header("statusevent").upper()) != MESH_STATUS_EVENT_TRANSFER:
             raise UnexpectedStatusEvent(header_value)

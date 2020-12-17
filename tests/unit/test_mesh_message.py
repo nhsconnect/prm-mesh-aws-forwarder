@@ -64,6 +64,14 @@ def test_exposes_date_delivered():
     assert message.date_delivered == date_delivered
 
 
+def test_exposes_sender():
+    sender = a_string()
+    client_message = mock_client_message(mex_headers=build_mex_headers(**{"from": sender}))
+    message = MeshMessage(client_message)
+
+    assert message.sender == sender
+
+
 def test_throws_exception_when_status_event_header_is_not_transfer():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_event="COLLECT"))
 
@@ -234,3 +242,18 @@ def test_exception_raised_for_missing_status_timestamp_header():
 
     exception = exception_info.value
     assert exception.header_name == "statustimestamp"
+
+
+def test_exception_raised_for_missing_from_header():
+    mex_headers = build_mex_headers()
+    del mex_headers["from"]
+
+    client_message = mock_client_message(mex_headers=mex_headers)
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(MissingMeshHeader) as exception_info:
+        _ = message.sender
+
+    exception = exception_info.value
+    assert exception.header_name == "from"
