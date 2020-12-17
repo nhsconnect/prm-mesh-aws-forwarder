@@ -224,7 +224,7 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
         mesh.send_message(RECEIVING_MESH_MAILBOX, file_contents)
         _wait_for_object_count(bucket, expected_count=1)
         actual_object = next(iter(bucket.objects.all()))
-        assert re.match(r"\d{4}/\d{2}/\d{2}/\d{14}_\d+\.dat", actual_object.key)
+        assert re.match(r"\d{4}/\d{2}/\d{2}/\d{20}_\d+\.dat", actual_object.key)
         actual_file_contents = actual_object.get()["Body"].read()
         assert actual_file_contents == file_contents
         forwarder.stop()
