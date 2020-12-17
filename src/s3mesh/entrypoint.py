@@ -10,8 +10,6 @@ from s3mesh.forwarder import MeshConfig, S3Config, build_forwarder_service
 from s3mesh.logging import JsonFormatter
 from s3mesh.secrets import SsmSecretManager
 
-LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
 
 def build_mesh_config_from_ssm(ssm, config) -> MeshConfig:
     mesh_client_cert_path = join(config.forwarder_home, "client_cert.pem")

@@ -12,7 +12,7 @@ from s3mesh.s3 import S3Uploader
 
 INVALID_MESH_HEADER_ERROR = "INVALID_MESH_HEADER"
 MISSING_MESH_HEADER_ERROR = "MISSING_MESH_HEADER"
-FORWARD_MESSAGE_EVENT = "FORWARD_MESSAGE"
+FORWARD_MESSAGE_EVENT = "FORWARD_MESH_MESSAGE"
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +26,16 @@ class MeshToS3Forwarder:
     def forward_messages(self):
         messages: Iterable[MeshMessage] = self._inbox.read_messages()
         for message in messages:
-            self._process_message(message)
+            observation = self._new_forwarded_message_observation(message)
+            self._process_message(message, observation)
+            observation.finish()
 
-    def _process_message(self, message):
+    def _new_forwarded_message_observation(self, message):
         observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)
         observation.add_field("messageId", message.id)
+        return observation
 
+    def _process_message(self, message, observation):
         try:
             observation.add_field("fileName", message.file_name)
             message.validate()
@@ -44,8 +48,6 @@ class MeshToS3Forwarder:
             observation.add_field("error", INVALID_MESH_HEADER_ERROR)
             observation.add_field("expectedHeaderValue", e.expected_header_value)
             observation.add_field("receivedHeaderValue", e.header_value)
-
-        observation.finish()
 
 
 class MeshToS3ForwarderService:
