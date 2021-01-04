@@ -51,8 +51,9 @@ def mock_client_message(**kwargs):
     return message
 
 
-def mock_mesh_inbox(client_messages=None):
+def mock_mesh_inbox(client_messages=None, error=None):
     client_messages = [] if client_messages is None else client_messages
     mock_mesh_client = MagicMock()
     mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
+    mock_mesh_client.iterate_all_messages.side_effect = error
     return MeshInbox(mock_mesh_client)

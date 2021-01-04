@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 from typing import Iterable
+from urllib.error import HTTPError
 
 from mesh_client import MeshClient, Message
 
@@ -59,8 +60,15 @@ class MeshInbox:
         self._client = client
 
     def read_messages(self) -> Iterable[MeshMessage]:
-        for client_message in self._client.iterate_all_messages():
-            yield MeshMessage(client_message)
+        try:
+            for client_message in self._client.iterate_all_messages():
+                yield MeshMessage(client_message)
+        except HTTPError:
+            raise MeshClientNetworkError()
+
+
+class MeshClientNetworkError(Exception):
+    pass
 
 
 class InvalidMeshHeader(Exception):

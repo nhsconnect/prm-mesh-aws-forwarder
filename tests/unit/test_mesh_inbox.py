@@ -1,5 +1,14 @@
+from urllib.error import HTTPError
+
+import pytest
+
+from s3mesh.mesh import MeshClientNetworkError
 from tests.builders.common import a_string
 from tests.builders.mesh import mock_client_message, mock_mesh_inbox
+
+
+def _mesh_client_network_error():
+    return HTTPError(url="www.test.com", code=400, msg=None, hdrs=None, fp=None)
 
 
 def test_returns_messages():
@@ -10,3 +19,10 @@ def test_returns_messages():
     actual_messages_ids = [message.id for message in mesh_inbox.read_messages()]
 
     assert actual_messages_ids == message_ids
+
+
+def test_raises_custom_exception_when_mesh_client_responds_with_an_error():
+    mesh_inbox = mock_mesh_inbox(error=_mesh_client_network_error())
+
+    with pytest.raises(MeshClientNetworkError):
+        list(mesh_inbox.read_messages())
