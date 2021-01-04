@@ -55,7 +55,7 @@ def test_desired_base_attributes_are_included_in_json(json_field, base_attribute
         "process",
     ],
 )
-def test_undesired_desired_base_attributes_are_not_in_json(base_attribute):
+def test_undesired_base_attributes_are_not_in_json(base_attribute):
     record = _build_log_record()
 
     actual_json_string = JsonFormatter().format(record)
