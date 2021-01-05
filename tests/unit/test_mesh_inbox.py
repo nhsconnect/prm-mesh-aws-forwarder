@@ -1,6 +1,5 @@
-from urllib.error import HTTPError
-
 import pytest
+from requests import RequestException
 
 from s3mesh.mesh import MeshClientNetworkError
 from tests.builders.common import a_string
@@ -8,7 +7,7 @@ from tests.builders.mesh import mock_client_message, mock_mesh_inbox
 
 
 def _mesh_client_network_error():
-    return HTTPError(url="www.test.com", code=400, msg=None, hdrs=None, fp=None)
+    return RequestException()
 
 
 def test_returns_messages():

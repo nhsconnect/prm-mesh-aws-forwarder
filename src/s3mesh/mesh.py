@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
 from typing import Iterable
-from urllib.error import HTTPError
 
 from mesh_client import MeshClient, Message
+from requests import RequestException
 
 MESH_STATUS_EVENT_TRANSFER = "TRANSFER"
 MESH_MESSAGE_TYPE_DATA = "DATA"
@@ -63,7 +63,7 @@ class MeshInbox:
         try:
             for client_message in self._client.iterate_all_messages():
                 yield MeshMessage(client_message)
-        except HTTPError:
+        except RequestException:
             raise MeshClientNetworkError()
 
 
