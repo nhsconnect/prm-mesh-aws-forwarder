@@ -87,7 +87,9 @@ class MeshToS3ForwarderService:
         while not self._exit_requested.is_set():
             messages = self._forwarder.poll_messages()
             self._forwarder.forward_messages(messages)
-            self._exit_requested.wait(self._poll_frequency_sec)
+
+            if len(messages) == 0:
+                self._exit_requested.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 
     def stop(self):
