@@ -5,11 +5,19 @@ import pytest
 from s3mesh.forwarder import (
     FORWARD_MESSAGE_EVENT,
     INVALID_MESH_HEADER_ERROR,
+    MESH_CLIENT_NETWORK_ERROR,
     MISSING_MESH_HEADER_ERROR,
+    POLL_MESSAGE_EVENT,
     MeshToS3Forwarder,
 )
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
 from tests.builders.common import a_string
+from tests.builders.mesh import (
+    TEST_INBOX_URL,
+    mesh_client_connection_error,
+    mesh_client_http_error,
+    mock_mesh_inbox,
+)
 
 
 def _an_invalid_header_exception(**kwargs):
@@ -40,7 +48,6 @@ def _build_forwarder(**kwargs):
     mock_mesh_inbox = kwargs.get("mesh_inbox", MagicMock())
     mock_s3_uploader = kwargs.get("s3_uploader", MagicMock())
     mock_probe = kwargs.get("probe", MagicMock())
-    mock_mesh_inbox.read_messages.return_value = iter(kwargs.get("incoming_messages", []))
 
     return MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader, mock_probe)
 
@@ -48,11 +55,9 @@ def _build_forwarder(**kwargs):
 def test_validates_message():
     mock_message = _a_mock_message()
 
-    forwarder = _build_forwarder(
-        incoming_messages=[mock_message],
-    )
+    forwarder = _build_forwarder()
 
-    forwarder.forward_messages()
+    forwarder.forward_messages([mock_message])
 
     mock_message.validate.assert_called_once()
 
@@ -64,11 +69,9 @@ def test_forwards_message():
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(
-        incoming_messages=[mock_message], s3_uploader=mock_uploader, probe=probe
-    )
+    forwarder = _build_forwarder(s3_uploader=mock_uploader, probe=probe)
 
-    forwarder.forward_messages()
+    forwarder.forward_messages([mock_message])
 
     mock_uploader.upload.assert_called_once_with(mock_message, observation)
 
@@ -76,11 +79,9 @@ def test_forwards_message():
 def test_acknowledges_message():
     mock_message = _a_mock_message()
 
-    forwarder = _build_forwarder(
-        incoming_messages=[mock_message],
-    )
+    forwarder = _build_forwarder()
 
-    forwarder.forward_messages()
+    forwarder.forward_messages([mock_message])
 
     mock_message.acknowledge.assert_called_once()
 
@@ -94,12 +95,11 @@ def test_forwards_multiple_messages():
     probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
-        incoming_messages=[mock_message_one, mock_message_two],
         s3_uploader=mock_uploader,
         probe=probe,
     )
 
-    forwarder.forward_messages()
+    forwarder.forward_messages([mock_message_one, mock_message_two])
 
     mock_uploader.upload.assert_has_calls(
         [
@@ -115,21 +115,21 @@ def test_acknowledges_multiple_message():
 
     mock_messages = [_a_mock_message(), _a_mock_message()]
 
-    forwarder = _build_forwarder(incoming_messages=mock_messages)
+    forwarder = _build_forwarder()
 
-    forwarder.forward_messages()
+    forwarder.forward_messages(mock_messages)
 
     for mock_message in mock_messages:
         mock_message.acknowledge.assert_called_once()
 
 
 def test_catches_invalid_header_error():
-    forwarder = _build_forwarder(
-        incoming_messages=[_a_mock_message(validation_error=_an_invalid_header_exception())]
-    )
+    forwarder = _build_forwarder()
 
     try:
-        forwarder.forward_messages()
+        forwarder.forward_messages(
+            [_a_mock_message(validation_error=_an_invalid_header_exception())]
+        )
     except InvalidMeshHeader:
         pytest.fail("InvalidMeshHeader was raised when it shouldn't have been")
 
@@ -144,12 +144,11 @@ def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header()
     probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
-        incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
         s3_uploader=mock_uploader,
         probe=probe,
     )
 
-    forwarder.forward_messages()
+    forwarder.forward_messages([successful_message_1, unsuccessful_message, successful_message_2])
 
     mock_uploader.upload.assert_has_calls(
         [
@@ -160,12 +159,12 @@ def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header()
 
 
 def test_catches_missing_header_error():
-    forwarder = _build_forwarder(
-        incoming_messages=[_a_mock_message(validation_error=_a_missing_header_exception())]
-    )
+    forwarder = _build_forwarder()
 
     try:
-        forwarder.forward_messages()
+        forwarder.forward_messages(
+            [_a_mock_message(validation_error=_a_missing_header_exception())]
+        )
     except MissingMeshHeader:
         pytest.fail("MissingMeshHeader was raised when it shouldn't have been")
 
@@ -181,12 +180,13 @@ def test_continues_uploading_messages_when_one_of_them_has_missing_mesh_header()
     probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
-        incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
         s3_uploader=mock_uploader,
         probe=probe,
     )
 
-    forwarder.forward_messages()
+    incoming_messages = [successful_message_1, unsuccessful_message, successful_message_2]
+
+    forwarder.forward_messages(incoming_messages)
 
     mock_uploader.upload.assert_has_calls(
         [
@@ -209,15 +209,16 @@ def test_records_message_progress():
     probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
-        incoming_messages=[
-            _a_mock_message(
-                message_id="123", sender="mesh123", recipient="mesh456", file_name="a_file.dat"
-            )
-        ],
         probe=probe,
     )
 
-    forwarder.forward_messages()
+    forwarder.forward_messages(
+        [
+            _a_mock_message(
+                message_id="123", sender="mesh123", recipient="mesh456", file_name="a_file.dat"
+            )
+        ]
+    )
 
     probe.start_observation.assert_called_once_with(FORWARD_MESSAGE_EVENT)
     observation.assert_has_calls(
@@ -238,7 +239,11 @@ def test_records_error_when_message_is_missing_header():
     probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(
-        incoming_messages=[
+        probe=probe,
+    )
+
+    forwarder.forward_messages(
+        [
             _a_mock_message(
                 message_id="abc",
                 sender="mesh123",
@@ -248,11 +253,8 @@ def test_records_error_when_message_is_missing_header():
                     header_name="fruit_header",
                 ),
             )
-        ],
-        probe=probe,
+        ]
     )
-
-    forwarder.forward_messages()
 
     probe.start_observation.assert_called_once_with(FORWARD_MESSAGE_EVENT)
     observation.assert_has_calls(
@@ -274,8 +276,10 @@ def test_records_error_when_message_has_invalid_header():
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(
-        incoming_messages=[
+    forwarder = _build_forwarder(probe=probe)
+
+    forwarder.forward_messages(
+        [
             _a_mock_message(
                 message_id="abc",
                 file_name="a_file.dat",
@@ -287,11 +291,8 @@ def test_records_error_when_message_has_invalid_header():
                     expected_header_value="mango",
                 ),
             )
-        ],
-        probe=probe,
+        ]
     )
-
-    forwarder.forward_messages()
 
     probe.start_observation.assert_called_once_with(FORWARD_MESSAGE_EVENT)
     observation.assert_has_calls(
@@ -303,6 +304,88 @@ def test_records_error_when_message_has_invalid_header():
             call.add_field("error", INVALID_MESH_HEADER_ERROR),
             call.add_field("expectedHeaderValue", "mango"),
             call.add_field("receivedHeaderValue", "banana"),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_records_polling_progress():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    mesh_inbox = MagicMock()
+
+    messages = [
+        _a_mock_message(
+            message_id="123", sender="mesh123", recipient="mesh456", file_name="a_file.dat"
+        ),
+        _a_mock_message(
+            message_id="123", sender="mesh123", recipient="mesh456", file_name="a_file.dat"
+        ),
+    ]
+
+    mesh_inbox.read_messages.return_value = messages
+
+    forwarder = _build_forwarder(probe=probe, mesh_inbox=mesh_inbox)
+
+    forwarder.poll_messages()
+
+    probe.start_observation.assert_called_once_with(POLL_MESSAGE_EVENT)
+    observation.assert_has_calls(
+        [
+            call.add_field("polledMessages", 2),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_records_http_error_when_polling_messages():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    mesh_inbox = mock_mesh_inbox(error=mesh_client_http_error())
+
+    forwarder = _build_forwarder(probe=probe, mesh_inbox=mesh_inbox)
+
+    forwarder.poll_messages()
+
+    probe.start_observation.assert_called_once_with(POLL_MESSAGE_EVENT)
+    observation.assert_has_calls(
+        [
+            call.add_field("error", MESH_CLIENT_NETWORK_ERROR),
+            call.add_field(
+                "errorMessage",
+                f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}",
+            ),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_records_connection_error_when_polling_messages():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    mesh_inbox = mock_mesh_inbox(error=mesh_client_connection_error())
+
+    forwarder = _build_forwarder(probe=probe, mesh_inbox=mesh_inbox)
+
+    forwarder.poll_messages()
+
+    probe.start_observation.assert_called_once_with(POLL_MESSAGE_EVENT)
+    observation.assert_has_calls(
+        [
+            call.add_field("error", MESH_CLIENT_NETWORK_ERROR),
+            call.add_field(
+                "errorMessage",
+                f"ConnectionError recieved when attempting to connect to: {TEST_INBOX_URL}",
+            ),
             call.finish(),
         ],
         any_order=False,

@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
-from typing import Iterable
+from typing import List
 
 from mesh_client import MeshClient, Message
-from requests import RequestException
+from requests import ConnectionError, HTTPError
 
 MESH_STATUS_EVENT_TRANSFER = "TRANSFER"
 MESH_MESSAGE_TYPE_DATA = "DATA"
@@ -59,16 +59,25 @@ class MeshInbox:
     def __init__(self, client: MeshClient):
         self._client = client
 
-    def read_messages(self) -> Iterable[MeshMessage]:
+    def read_messages(self) -> List[MeshMessage]:
         try:
-            for client_message in self._client.iterate_all_messages():
-                yield MeshMessage(client_message)
-        except RequestException:
-            raise MeshClientNetworkError()
+            return [
+                MeshMessage(client_message)
+                for client_message in self._client.iterate_all_messages()
+            ]
+        except HTTPError as e:
+            raise MeshClientNetworkError(
+                f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
+            )
+        except ConnectionError as e:
+            raise MeshClientNetworkError(
+                f"ConnectionError recieved when attempting to connect to: {e.request.url}"
+            )
 
 
 class MeshClientNetworkError(Exception):
-    pass
+    def __init__(self, message):
+        self.error_message = message
 
 
 class InvalidMeshHeader(Exception):

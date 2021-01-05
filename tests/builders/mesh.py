@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+from requests import ConnectionError, HTTPError, Request, Response
+
 from s3mesh.mesh import (
     MESH_MESSAGE_TYPE_DATA,
     MESH_STATUS_EVENT_TRANSFER,
@@ -7,6 +9,8 @@ from s3mesh.mesh import (
     MeshInbox,
 )
 from tests.builders.common import a_datetime, a_string
+
+TEST_INBOX_URL = "https://mesh.test.test.uk/messageexchange/test_inbox/inbox"
 
 
 def an_epoch_timestamp():
@@ -57,3 +61,17 @@ def mock_mesh_inbox(client_messages=None, error=None):
     mock_mesh_client.iterate_all_messages.return_value = iter(client_messages)
     mock_mesh_client.iterate_all_messages.side_effect = error
     return MeshInbox(mock_mesh_client)
+
+
+def mesh_client_http_error():
+    response = Response()
+    response.status_code = 400
+    response.reason = "Bad request for url"
+    response.url = TEST_INBOX_URL
+    return HTTPError(response=response)
+
+
+def mesh_client_connection_error():
+    request = Request()
+    request.url = TEST_INBOX_URL
+    return ConnectionError(request=request)

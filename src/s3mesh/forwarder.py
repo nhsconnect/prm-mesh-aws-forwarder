@@ -1,18 +1,26 @@
 import logging
 from dataclasses import dataclass
 from threading import Event
-from typing import Iterable, Optional
+from typing import List, Optional
 
 import boto3
 import mesh_client
 
-from s3mesh.mesh import InvalidMeshHeader, MeshInbox, MeshMessage, MissingMeshHeader
+from s3mesh.mesh import (
+    InvalidMeshHeader,
+    MeshClientNetworkError,
+    MeshInbox,
+    MeshMessage,
+    MissingMeshHeader,
+)
 from s3mesh.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
 
 INVALID_MESH_HEADER_ERROR = "INVALID_MESH_HEADER"
 MISSING_MESH_HEADER_ERROR = "MISSING_MESH_HEADER"
+MESH_CLIENT_NETWORK_ERROR = "MESH_CLIENT_NETWORK_ERROR"
 FORWARD_MESSAGE_EVENT = "FORWARD_MESH_MESSAGE"
+POLL_MESSAGE_EVENT = "POLL_MESSAGE_EVENT"
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +31,20 @@ class MeshToS3Forwarder:
         self._uploader = uploader
         self._probe = probe
 
-    def forward_messages(self):
-        messages: Iterable[MeshMessage] = self._inbox.read_messages()
+    def poll_messages(self):
+        observation = self._new_poll_message_observation()
+        try:
+            messages = list(self._inbox.read_messages())
+            observation.add_field("polledMessages", len(messages))
+            observation.finish()
+            return messages
+        except MeshClientNetworkError as e:
+            observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
+            observation.add_field("errorMessage", e.error_message)
+            observation.finish()
+            return []
+
+    def forward_messages(self, messages: List[MeshMessage]):
         for message in messages:
             observation = self._new_forwarded_message_observation(message)
             self._process_message(message, observation)
@@ -33,6 +53,10 @@ class MeshToS3Forwarder:
     def _new_forwarded_message_observation(self, message):
         observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)
         observation.add_field("messageId", message.id)
+        return observation
+
+    def _new_poll_message_observation(self):
+        observation = self._probe.start_observation(POLL_MESSAGE_EVENT)
         return observation
 
     def _process_message(self, message, observation):
@@ -61,7 +85,8 @@ class MeshToS3ForwarderService:
     def start(self):
         logger.info("Started forwarder service")
         while not self._exit_requested.is_set():
-            self._forwarder.forward_messages()
+            messages = self._forwarder.poll_messages()
+            self._forwarder.forward_messages(messages)
             self._exit_requested.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 

@@ -1,13 +1,8 @@
 import pytest
-from requests import RequestException
 
 from s3mesh.mesh import MeshClientNetworkError
 from tests.builders.common import a_string
-from tests.builders.mesh import mock_client_message, mock_mesh_inbox
-
-
-def _mesh_client_network_error():
-    return RequestException()
+from tests.builders.mesh import mesh_client_http_error, mock_client_message, mock_mesh_inbox
 
 
 def test_returns_messages():
@@ -21,7 +16,7 @@ def test_returns_messages():
 
 
 def test_raises_custom_exception_when_mesh_client_responds_with_an_error():
-    mesh_inbox = mock_mesh_inbox(error=_mesh_client_network_error())
+    mesh_inbox = mock_mesh_inbox(error=mesh_client_http_error())
 
     with pytest.raises(MeshClientNetworkError):
         list(mesh_inbox.read_messages())
