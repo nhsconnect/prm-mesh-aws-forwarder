@@ -340,3 +340,21 @@ def test_records_mesh_error_when_polling_messages():
         ],
         any_order=False,
     )
+
+
+def test_returns_false_if_mailbox_is_not_empty():
+    mesh_inbox = MagicMock()
+    mesh_inbox.count_messages.return_value = 1
+
+    forwarder = _build_forwarder(mesh_inbox=mesh_inbox)
+
+    assert forwarder.is_mailbox_empty() is False
+
+
+def test_returns_true_if_mailbox_is_empty():
+    mesh_inbox = MagicMock()
+    mesh_inbox.count_messages.return_value = 0
+
+    forwarder = _build_forwarder(mesh_inbox=mesh_inbox)
+
+    assert forwarder.is_mailbox_empty() is True

@@ -31,6 +31,9 @@ class MeshToS3Forwarder:
             self._process_message(message, observation)
             observation.finish()
 
+    def is_mailbox_empty(self):
+        return self._inbox.count_messages() == 0
+
     def _poll_messages(self):
         observation = self._new_poll_message_observation()
         try:
@@ -80,7 +83,9 @@ class MeshToS3ForwarderService:
         logger.info("Started forwarder service")
         while not self._exit_requested.is_set():
             self._forwarder.forward_messages()
-            self._exit_requested.wait(self._poll_frequency_sec)
+
+            if self._forwarder.is_mailbox_empty():
+                self._exit_requested.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 
     def stop(self):

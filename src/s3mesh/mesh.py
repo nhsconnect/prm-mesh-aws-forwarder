@@ -74,6 +74,9 @@ class MeshInbox:
                 f"ConnectionError recieved when attempting to connect to: {e.request.url}"
             )
 
+    def count_messages(self) -> int:
+        return self._client.count_messages()
+
 
 class MeshClientNetworkError(Exception):
     def __init__(self, message):
