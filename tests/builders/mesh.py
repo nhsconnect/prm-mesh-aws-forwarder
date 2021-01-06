@@ -6,6 +6,7 @@ from s3mesh.mesh import (
     MESH_MESSAGE_TYPE_DATA,
     MESH_STATUS_EVENT_TRANSFER,
     MESH_STATUS_SUCCESS,
+    MeshClientNetworkError,
     MeshInbox,
 )
 from tests.builders.common import a_datetime, a_string
@@ -75,3 +76,7 @@ def mesh_client_connection_error():
     request = Request()
     request.url = TEST_INBOX_URL
     return ConnectionError(request=request)
+
+
+def mesh_client_error():
+    return MeshClientNetworkError("A message")

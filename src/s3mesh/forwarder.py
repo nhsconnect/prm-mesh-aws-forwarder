@@ -1,18 +1,12 @@
 import logging
 from dataclasses import dataclass
 from threading import Event
-from typing import List, Optional
+from typing import Optional
 
 import boto3
 import mesh_client
 
-from s3mesh.mesh import (
-    InvalidMeshHeader,
-    MeshClientNetworkError,
-    MeshInbox,
-    MeshMessage,
-    MissingMeshHeader,
-)
+from s3mesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshInbox, MissingMeshHeader
 from s3mesh.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
 
@@ -31,7 +25,13 @@ class MeshToS3Forwarder:
         self._uploader = uploader
         self._probe = probe
 
-    def poll_messages(self):
+    def forward_messages(self):
+        for message in self._poll_messages():
+            observation = self._new_forwarded_message_observation(message)
+            self._process_message(message, observation)
+            observation.finish()
+
+    def _poll_messages(self):
         observation = self._new_poll_message_observation()
         try:
             messages = list(self._inbox.read_messages())
@@ -43,12 +43,6 @@ class MeshToS3Forwarder:
             observation.add_field("errorMessage", e.error_message)
             observation.finish()
             return []
-
-    def forward_messages(self, messages: List[MeshMessage]):
-        for message in messages:
-            observation = self._new_forwarded_message_observation(message)
-            self._process_message(message, observation)
-            observation.finish()
 
     def _new_forwarded_message_observation(self, message):
         observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)
@@ -85,11 +79,8 @@ class MeshToS3ForwarderService:
     def start(self):
         logger.info("Started forwarder service")
         while not self._exit_requested.is_set():
-            messages = self._forwarder.poll_messages()
-            self._forwarder.forward_messages(messages)
-
-            if len(messages) == 0:
-                self._exit_requested.wait(self._poll_frequency_sec)
+            self._forwarder.forward_messages()
+            self._exit_requested.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 
     def stop(self):
