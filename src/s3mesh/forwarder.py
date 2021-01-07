@@ -37,7 +37,7 @@ class MeshToS3Forwarder:
     def _poll_messages(self):
         observation = self._new_poll_message_observation()
         try:
-            messages = list(self._inbox.read_messages())
+            messages = self._inbox.read_messages()
             observation.add_field("polledMessages", len(messages))
             observation.finish()
             return messages
