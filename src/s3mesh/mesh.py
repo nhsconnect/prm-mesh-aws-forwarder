@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import List, Callable, Any
+from typing import Any, Callable, List
 
 from mesh_client import MeshClient, Message
 from requests import ConnectionError, HTTPError
