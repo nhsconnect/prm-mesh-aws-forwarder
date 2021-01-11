@@ -35,7 +35,7 @@ def test_raises_network_error_when_iterating_all_messages_throws_a_connection_er
         mesh_inbox.read_messages()
     except MeshClientNetworkError as e:
         assert e.error_message == (
-            f"ConnectionError recieved when attempting to connect to: {TEST_INBOX_URL}"
+            f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
         )
 
 
@@ -55,5 +55,5 @@ def test_raises_network_error_when_counting_messages_throws_a_connection_error()
         mesh_inbox.count_messages()
     except MeshClientNetworkError as e:
         assert e.error_message == (
-            f"ConnectionError recieved when attempting to connect to: {TEST_INBOX_URL}"
+            f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
         )

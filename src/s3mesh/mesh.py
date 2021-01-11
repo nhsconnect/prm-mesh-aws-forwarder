@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import List
+from typing import List, Callable, Any
 
 from mesh_client import MeshClient, Message
 from requests import ConnectionError, HTTPError
@@ -10,6 +10,19 @@ MESH_MESSAGE_TYPE_DATA = "DATA"
 MESH_STATUS_SUCCESS = "SUCCESS"
 
 logger = logging.getLogger(__name__)
+
+
+def _invoke_client_method(client_method: Callable[[], Any]):
+    try:
+        return client_method()
+    except HTTPError as e:
+        raise MeshClientNetworkError(
+            f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
+        )
+    except ConnectionError as e:
+        raise MeshClientNetworkError(
+            f"ConnectionError received when attempting to connect to: {e.request.url}"
+        )
 
 
 class MeshMessage:
@@ -60,31 +73,13 @@ class MeshInbox:
         self._client = client
 
     def read_messages(self) -> List[MeshMessage]:
-        try:
-            return [
-                MeshMessage(client_message)
-                for client_message in self._client.iterate_all_messages()
-            ]
-        except HTTPError as e:
-            raise MeshClientNetworkError(
-                f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
-            )
-        except ConnectionError as e:
-            raise MeshClientNetworkError(
-                f"ConnectionError recieved when attempting to connect to: {e.request.url}"
-            )
+        return [
+            MeshMessage(client_message)
+            for client_message in _invoke_client_method(self._client.iterate_all_messages)
+        ]
 
     def count_messages(self) -> int:
-        try:
-            return self._client.count_messages()
-        except HTTPError as e:
-            raise MeshClientNetworkError(
-                f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
-            )
-        except ConnectionError as e:
-            raise MeshClientNetworkError(
-                f"ConnectionError recieved when attempting to connect to: {e.request.url}"
-            )
+        return _invoke_client_method(self._client.count_messages)
 
 
 class MeshClientNetworkError(Exception):
