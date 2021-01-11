@@ -1,3 +1,5 @@
+import pytest
+
 from s3mesh.mesh import MeshClientNetworkError
 from tests.builders.common import a_string
 from tests.builders.mesh import (
@@ -19,41 +21,41 @@ def test_returns_messages():
     assert actual_messages_ids == message_ids
 
 
-def test_raises_network_error_when_iterating_all_messages_throws_an_http_error():
+def test_raises_network_error_when_iterating_all_messages_raises_an_http_error():
     mesh_inbox = mock_mesh_inbox(iterate_messages_error=mesh_client_http_error())
 
-    try:
+    with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.read_messages()
-    except MeshClientNetworkError as e:
-        assert e.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+
+    assert e.value.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
 
 
-def test_raises_network_error_when_iterating_all_messages_throws_a_connection_error():
+def test_raises_network_error_when_iterating_all_messages_raises_a_connection_error():
     mesh_inbox = mock_mesh_inbox(iterate_messages_error=mesh_client_connection_error())
 
-    try:
+    with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.read_messages()
-    except MeshClientNetworkError as e:
-        assert e.error_message == (
-            f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
-        )
+
+    assert e.value.error_message == (
+        f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+    )
 
 
-def test_raises_network_error_when_counting_messages_throws_an_http_error():
+def test_raises_network_error_when_counting_messages_raises_an_http_error():
     mesh_inbox = mock_mesh_inbox(count_messages_error=mesh_client_http_error())
 
-    try:
+    with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.count_messages()
-    except MeshClientNetworkError as e:
-        assert e.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+
+    assert e.value.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
 
 
-def test_raises_network_error_when_counting_messages_throws_a_connection_error():
+def test_raises_network_error_when_counting_messages_raises_a_connection_error():
     mesh_inbox = mock_mesh_inbox(count_messages_error=mesh_client_connection_error())
 
-    try:
+    with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.count_messages()
-    except MeshClientNetworkError as e:
-        assert e.error_message == (
-            f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
-        )
+
+    assert e.value.error_message == (
+        f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+    )
