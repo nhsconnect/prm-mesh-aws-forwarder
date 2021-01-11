@@ -19,6 +19,10 @@ POLL_MESSAGE_EVENT = "POLL_MESSAGE"
 logger = logging.getLogger(__name__)
 
 
+class RetryableException(Exception):
+    pass
+
+
 class MeshToS3Forwarder:
     def __init__(self, inbox: MeshInbox, uploader: S3Uploader, probe: LoggingProbe):
         self._inbox = inbox
@@ -45,7 +49,7 @@ class MeshToS3Forwarder:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
             observation.finish()
-            return []
+            raise RetryableException
 
     def _new_forwarded_message_observation(self, message):
         observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)

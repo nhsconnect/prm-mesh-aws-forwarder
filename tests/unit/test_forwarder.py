@@ -9,6 +9,7 @@ from s3mesh.forwarder import (
     MISSING_MESH_HEADER_ERROR,
     POLL_MESSAGE_EVENT,
     MeshToS3Forwarder,
+    RetryableException,
 )
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
 from tests.builders.common import a_string
@@ -319,14 +320,21 @@ def test_records_error_when_message_has_invalid_header():
     )
 
 
+def test_raises_retryable_exception_when_inbox_read_messages_raises_mesh_network_exception():
+    forwarder = _build_forwarder(read_error=mesh_client_error())
+
+    with pytest.raises(RetryableException):
+        forwarder.forward_messages()
+
+
 def test_records_mesh_error_when_polling_messages():
     probe = MagicMock()
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
     forwarder = _build_forwarder(probe=probe, read_error=mesh_client_error())
-
-    forwarder.forward_messages()
+    with pytest.raises(RetryableException):
+        forwarder.forward_messages()
 
     probe.start_observation.assert_called_once_with(POLL_MESSAGE_EVENT)
     observation.assert_has_calls(
