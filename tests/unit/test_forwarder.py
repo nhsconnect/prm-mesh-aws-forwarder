@@ -8,12 +8,12 @@ from s3mesh.forwarder import (
     MESH_CLIENT_NETWORK_ERROR,
     MISSING_MESH_HEADER_ERROR,
     POLL_MESSAGE_EVENT,
-    MeshToS3Forwarder,
     RetryableException,
 )
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
 from tests.builders.common import a_string
-from tests.builders.mesh import mesh_client_error
+from tests.builders.forwarder import build_forwarder
+from tests.builders.mesh import mesh_client_error, mock_mesh_message
 
 
 def _an_invalid_header_exception(**kwargs):
@@ -30,30 +30,10 @@ def _a_missing_header_exception(**kwargs):
     )
 
 
-def _a_mock_message(**kwargs):
-    message = MagicMock()
-    message.id = kwargs.get("message_id", a_string())
-    message.file_name = kwargs.get("file_name", a_string())
-    message.sender = kwargs.get("sender", a_string())
-    message.recipient = kwargs.get("recipient", a_string())
-    message.validate.side_effect = kwargs.get("validation_error", None)
-    return message
-
-
-def _build_forwarder(**kwargs):
-    mock_mesh_inbox = kwargs.get("mesh_inbox", MagicMock())
-    mock_s3_uploader = kwargs.get("s3_uploader", MagicMock())
-    mock_probe = kwargs.get("probe", MagicMock())
-    mock_mesh_inbox.read_messages.return_value = kwargs.get("incoming_messages", [])
-    mock_mesh_inbox.read_messages.side_effect = kwargs.get("read_error", None)
-
-    return MeshToS3Forwarder(mock_mesh_inbox, mock_s3_uploader, mock_probe)
-
-
 def test_validates_message():
-    mock_message = _a_mock_message()
+    mock_message = mock_mesh_message()
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[mock_message],
     )
 
@@ -63,13 +43,13 @@ def test_validates_message():
 
 
 def test_forwards_message():
-    mock_message = _a_mock_message()
+    mock_message = mock_mesh_message()
     mock_uploader = MagicMock()
     probe = MagicMock()
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[mock_message], s3_uploader=mock_uploader, probe=probe
     )
 
@@ -79,9 +59,9 @@ def test_forwards_message():
 
 
 def test_acknowledges_message():
-    mock_message = _a_mock_message()
+    mock_message = mock_mesh_message()
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[mock_message],
     )
 
@@ -91,14 +71,14 @@ def test_acknowledges_message():
 
 
 def test_forwards_multiple_messages():
-    mock_message_one = _a_mock_message()
-    mock_message_two = _a_mock_message()
+    mock_message_one = mock_mesh_message()
+    mock_message_two = mock_mesh_message()
     mock_uploader = MagicMock()
     probe = MagicMock()
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[mock_message_one, mock_message_two],
         s3_uploader=mock_uploader,
         probe=probe,
@@ -118,9 +98,9 @@ def test_forwards_multiple_messages():
 
 def test_acknowledges_multiple_message():
 
-    mock_messages = [_a_mock_message(), _a_mock_message()]
+    mock_messages = [mock_mesh_message(), mock_mesh_message()]
 
-    forwarder = _build_forwarder(incoming_messages=mock_messages)
+    forwarder = build_forwarder(incoming_messages=mock_messages)
 
     forwarder.forward_messages()
 
@@ -129,8 +109,8 @@ def test_acknowledges_multiple_message():
 
 
 def test_catches_invalid_header_error():
-    forwarder = _build_forwarder(
-        incoming_messages=[_a_mock_message(validation_error=_an_invalid_header_exception())]
+    forwarder = build_forwarder(
+        incoming_messages=[mock_mesh_message(validation_error=_an_invalid_header_exception())]
     )
 
     try:
@@ -140,15 +120,15 @@ def test_catches_invalid_header_error():
 
 
 def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header():
-    successful_message_1 = _a_mock_message()
-    successful_message_2 = _a_mock_message()
-    unsuccessful_message = _a_mock_message(validation_error=_an_invalid_header_exception())
+    successful_message_1 = mock_mesh_message()
+    successful_message_2 = mock_mesh_message()
+    unsuccessful_message = mock_mesh_message(validation_error=_an_invalid_header_exception())
     mock_uploader = MagicMock()
     probe = MagicMock()
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
         s3_uploader=mock_uploader,
         probe=probe,
@@ -165,8 +145,8 @@ def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header()
 
 
 def test_catches_missing_header_error():
-    forwarder = _build_forwarder(
-        incoming_messages=[_a_mock_message(validation_error=_a_missing_header_exception())]
+    forwarder = build_forwarder(
+        incoming_messages=[mock_mesh_message(validation_error=_a_missing_header_exception())]
     )
 
     try:
@@ -176,16 +156,16 @@ def test_catches_missing_header_error():
 
 
 def test_continues_uploading_messages_when_one_of_them_has_missing_mesh_header():
-    successful_message_1 = _a_mock_message()
-    successful_message_2 = _a_mock_message()
-    unsuccessful_message = _a_mock_message(validation_error=_a_missing_header_exception())
+    successful_message_1 = mock_mesh_message()
+    successful_message_2 = mock_mesh_message()
+    unsuccessful_message = mock_mesh_message(validation_error=_a_missing_header_exception())
 
     mock_uploader = MagicMock()
     probe = MagicMock()
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
         s3_uploader=mock_uploader,
         probe=probe,
@@ -202,7 +182,7 @@ def test_continues_uploading_messages_when_one_of_them_has_missing_mesh_header()
 
 
 def test_does_not_catch_generic_exception():
-    forwarder = _build_forwarder(incoming_messages=[_a_mock_message(validation_error=Exception)])
+    forwarder = build_forwarder(incoming_messages=[mock_mesh_message(validation_error=Exception)])
 
     with pytest.raises(Exception):
         forwarder.forward_messages()
@@ -214,9 +194,9 @@ def test_records_message_progress():
     forward_observation = MagicMock()
     probe.start_observation.side_effect = [poll_observation, forward_observation]
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[
-            _a_mock_message(
+            mock_mesh_message(
                 message_id="123", sender="mesh123", recipient="mesh456", file_name="a_file.dat"
             )
         ],
@@ -248,9 +228,9 @@ def test_records_error_when_message_is_missing_header():
     observation = MagicMock()
     probe.start_observation.side_effect = [MagicMock(), observation]
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[
-            _a_mock_message(
+            mock_mesh_message(
                 message_id="abc",
                 sender="mesh123",
                 recipient="mesh456",
@@ -285,9 +265,9 @@ def test_records_error_when_message_has_invalid_header():
     observation = MagicMock()
     probe.start_observation.side_effect = [MagicMock(), observation]
 
-    forwarder = _build_forwarder(
+    forwarder = build_forwarder(
         incoming_messages=[
-            _a_mock_message(
+            mock_mesh_message(
                 message_id="abc",
                 file_name="a_file.dat",
                 sender="mesh123",
@@ -321,7 +301,7 @@ def test_records_error_when_message_has_invalid_header():
 
 
 def test_raises_retryable_exception_when_inbox_read_messages_raises_mesh_network_exception():
-    forwarder = _build_forwarder(read_error=mesh_client_error())
+    forwarder = build_forwarder(read_error=mesh_client_error())
 
     with pytest.raises(RetryableException):
         forwarder.forward_messages()
@@ -332,7 +312,7 @@ def test_records_mesh_error_when_polling_messages():
     observation = MagicMock()
     probe.start_observation.return_value = observation
 
-    forwarder = _build_forwarder(probe=probe, read_error=mesh_client_error())
+    forwarder = build_forwarder(probe=probe, read_error=mesh_client_error())
     with pytest.raises(RetryableException):
         forwarder.forward_messages()
 
@@ -354,7 +334,7 @@ def test_returns_false_if_mailbox_is_not_empty():
     mesh_inbox = MagicMock()
     mesh_inbox.count_messages.return_value = 1
 
-    forwarder = _build_forwarder(mesh_inbox=mesh_inbox)
+    forwarder = build_forwarder(mesh_inbox=mesh_inbox)
 
     assert forwarder.is_mailbox_empty() is False
 
@@ -363,6 +343,6 @@ def test_returns_true_if_mailbox_is_empty():
     mesh_inbox = MagicMock()
     mesh_inbox.count_messages.return_value = 0
 
-    forwarder = _build_forwarder(mesh_inbox=mesh_inbox)
+    forwarder = build_forwarder(mesh_inbox=mesh_inbox)
 
     assert forwarder.is_mailbox_empty() is True

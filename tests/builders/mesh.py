@@ -56,6 +56,16 @@ def mock_client_message(**kwargs):
     return message
 
 
+def mock_mesh_message(**kwargs):
+    message = MagicMock()
+    message.id = kwargs.get("message_id", a_string())
+    message.file_name = kwargs.get("file_name", a_string())
+    message.sender = kwargs.get("sender", a_string())
+    message.recipient = kwargs.get("recipient", a_string())
+    message.validate.side_effect = kwargs.get("validation_error", None)
+    return message
+
+
 def mock_mesh_inbox(client_messages=None, iterate_messages_error=None, count_messages_error=None):
     client_messages = [] if client_messages is None else client_messages
     mock_mesh_client = MagicMock()
