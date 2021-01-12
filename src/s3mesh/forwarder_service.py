@@ -32,23 +32,28 @@ class S3Config:
 
 
 class MeshToS3ForwarderService:
-    def __init__(self, forwarder: MeshToS3Forwarder, poll_frequency_sec: int):
+    def __init__(
+        self,
+        forwarder: MeshToS3Forwarder,
+        poll_frequency_sec: int,
+        exit_event: Optional[Event] = None,
+    ):
         self._forwarder = forwarder
-        self._exit_requested = Event()
+        self._exit_event = exit_event or Event()
         self._poll_frequency_sec = poll_frequency_sec
 
     def start(self):
         logger.info("Started forwarder service")
-        while not self._exit_requested.is_set():
+        while not self._exit_event.is_set():
             self._forwarder.forward_messages()
 
             if self._forwarder.is_mailbox_empty():
-                self._exit_requested.wait(self._poll_frequency_sec)
+                self._exit_event.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 
     def stop(self):
         logger.info("Received request to stop")
-        self._exit_requested.set()
+        self._exit_event.set()
 
 
 def build_forwarder_service(
