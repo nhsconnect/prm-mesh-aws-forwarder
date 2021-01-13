@@ -26,9 +26,7 @@ class MeshToS3Forwarder:
 
     def forward_messages(self):
         for message in self._poll_messages():
-            observation = self._new_forwarded_message_observation(message)
-            self._process_message(message, observation)
-            observation.finish()
+            self._process_message(message)
 
     def is_mailbox_empty(self):
         try:
@@ -41,13 +39,13 @@ class MeshToS3Forwarder:
         try:
             messages = self._inbox.read_messages()
             observation.add_field("polledMessages", len(messages))
-            observation.finish()
             return messages
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
-            observation.finish()
             raise RetryableException(e.error_message)
+        finally:
+            observation.finish()
 
     def _new_forwarded_message_observation(self, message):
         observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)
@@ -58,7 +56,8 @@ class MeshToS3Forwarder:
         observation = self._probe.start_observation(POLL_MESSAGE_EVENT)
         return observation
 
-    def _process_message(self, message, observation):
+    def _process_message(self, message):
+        observation = self._new_forwarded_message_observation(message)
         try:
             observation.add_field("sender", message.sender)
             observation.add_field("recipient", message.recipient)
@@ -76,5 +75,6 @@ class MeshToS3Forwarder:
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
-            observation.finish()
             raise RetryableException(e.error_message)
+        finally:
+            observation.finish()
