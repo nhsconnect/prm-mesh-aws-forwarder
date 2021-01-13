@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class RetryableException(Exception):
-    pass
+    def __init__(self, message=None):
+        self.error_message = message
 
 
 class MeshToS3Forwarder:
@@ -30,7 +31,10 @@ class MeshToS3Forwarder:
             observation.finish()
 
     def is_mailbox_empty(self):
-        return self._inbox.count_messages() == 0
+        try:
+            return self._inbox.count_messages() == 0
+        except MeshClientNetworkError as e:
+            raise RetryableException(e.error_message)
 
     def _poll_messages(self):
         observation = self._new_poll_message_observation()
@@ -43,7 +47,7 @@ class MeshToS3Forwarder:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
             observation.finish()
-            raise RetryableException
+            raise RetryableException(e.error_message)
 
     def _new_forwarded_message_observation(self, message):
         observation = self._probe.start_observation(FORWARD_MESSAGE_EVENT)

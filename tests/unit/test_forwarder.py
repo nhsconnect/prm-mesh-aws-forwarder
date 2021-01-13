@@ -301,10 +301,12 @@ def test_records_error_when_message_has_invalid_header():
 
 
 def test_raises_retryable_exception_when_inbox_read_messages_raises_mesh_network_exception():
-    forwarder = build_forwarder(read_error=mesh_client_error())
+    forwarder = build_forwarder(read_error=mesh_client_error("Network error"))
 
-    with pytest.raises(RetryableException):
+    with pytest.raises(RetryableException) as e:
         forwarder.forward_messages()
+
+    assert e.value.error_message == "Network error"
 
 
 def test_records_mesh_error_when_polling_messages():
@@ -346,3 +348,12 @@ def test_returns_true_if_mailbox_is_empty():
     forwarder = build_forwarder(mesh_inbox=mesh_inbox)
 
     assert forwarder.is_mailbox_empty() is True
+
+
+def test_raises_retryable_exception_when_inbox_count_messages_raises_mesh_network_exception():
+    forwarder = build_forwarder(count_error=mesh_client_error("Network error"))
+
+    with pytest.raises(RetryableException) as e:
+        forwarder.is_mailbox_empty()
+
+    assert e.value.error_message == "Network error"

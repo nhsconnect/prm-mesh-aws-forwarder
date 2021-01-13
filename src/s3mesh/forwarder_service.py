@@ -6,12 +6,14 @@ from typing import Optional
 import boto3
 import mesh_client
 
-from s3mesh.forwarder import MeshToS3Forwarder
+from s3mesh.forwarder import MeshToS3Forwarder, RetryableException
 from s3mesh.mesh import MeshInbox
 from s3mesh.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
 
 logger = logging.getLogger(__name__)
+
+RETRYABLE_ERROR = "RETRYABLE_ERROR"
 
 
 @dataclass
@@ -45,9 +47,13 @@ class MeshToS3ForwarderService:
     def start(self):
         logger.info("Started forwarder service")
         while not self._exit_event.is_set():
-            self._forwarder.forward_messages()
+            try:
+                self._forwarder.forward_messages()
 
-            if self._forwarder.is_mailbox_empty():
+                if self._forwarder.is_mailbox_empty():
+                    self._exit_event.wait(self._poll_frequency_sec)
+            except RetryableException as e:
+                logger.info(RETRYABLE_ERROR, extra={"errorMessage": e.error_message})
                 self._exit_event.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 
