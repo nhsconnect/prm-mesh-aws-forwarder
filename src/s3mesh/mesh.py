@@ -62,7 +62,7 @@ class MeshMessage:
             raise UnexpectedMessageType(header_value)
 
     def acknowledge(self):
-        self._client_message.acknowledge()
+        _invoke_client_method(self._client_message.acknowledge)
 
     def read(self, n=None):
         return self._client_message.read(n)

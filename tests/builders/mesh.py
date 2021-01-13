@@ -52,6 +52,7 @@ def mock_client_message(**kwargs):
     mex_headers = kwargs.get("mex_headers", build_mex_headers())
     message = MagicMock()
     message.id.return_value = kwargs.get("message_id", a_string())
+    message.acknowledge.side_effect = kwargs.get("acknowledge_error", None)
     message.mex_header = lambda key: mex_headers[key]
     return message
 
@@ -63,6 +64,7 @@ def mock_mesh_message(**kwargs):
     message.sender = kwargs.get("sender", a_string())
     message.recipient = kwargs.get("recipient", a_string())
     message.validate.side_effect = kwargs.get("validation_error", None)
+    message.acknowledge.side_effect = kwargs.get("acknowledge_error", None)
     return message
 
 

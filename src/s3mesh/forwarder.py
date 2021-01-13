@@ -73,3 +73,8 @@ class MeshToS3Forwarder:
             observation.add_field("error", INVALID_MESH_HEADER_ERROR)
             observation.add_field("expectedHeaderValue", e.expected_header_value)
             observation.add_field("receivedHeaderValue", e.header_value)
+        except MeshClientNetworkError as e:
+            observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
+            observation.add_field("errorMessage", e.error_message)
+            observation.finish()
+            raise RetryableException(e.error_message)

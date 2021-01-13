@@ -4,6 +4,7 @@ from s3mesh.mesh import (
     MESH_MESSAGE_TYPE_DATA,
     MESH_STATUS_EVENT_TRANSFER,
     MESH_STATUS_SUCCESS,
+    MeshClientNetworkError,
     MeshMessage,
     MissingMeshHeader,
     UnexpectedMessageType,
@@ -11,7 +12,15 @@ from s3mesh.mesh import (
     UnsuccessfulStatus,
 )
 from tests.builders.common import a_datetime, a_string
-from tests.builders.mesh import a_filename, a_timestamp, build_mex_headers, mock_client_message
+from tests.builders.mesh import (
+    TEST_INBOX_URL,
+    a_filename,
+    a_timestamp,
+    build_mex_headers,
+    mesh_client_connection_error,
+    mesh_client_http_error,
+    mock_client_message,
+)
 
 
 def test_calls_acknowledge_on_underlying_client_message():
@@ -280,3 +289,27 @@ def test_exception_raised_for_missing_to_header():
 
     exception = exception_info.value
     assert exception.header_name == "to"
+
+
+def test_mesh_network_error_raised_when_ack_raises_http_error():
+    client_message = mock_client_message(acknowledge_error=mesh_client_http_error())
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(MeshClientNetworkError) as e:
+        message.acknowledge()
+
+    assert e.value.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+
+
+def test_mesh_network_error_raised_when_ack_raises_connection_error():
+    client_message = mock_client_message(acknowledge_error=mesh_client_connection_error())
+
+    message = MeshMessage(client_message)
+
+    with pytest.raises(MeshClientNetworkError) as e:
+        message.acknowledge()
+
+    assert e.value.error_message == (
+        f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+    )

@@ -309,6 +309,53 @@ def test_raises_retryable_exception_when_inbox_read_messages_raises_mesh_network
     assert e.value.error_message == "Network error"
 
 
+def test_raises_retryable_exception_when_mesh_message_ack_raises_mesh_network_exception():
+    mock_message = mock_mesh_message(acknowledge_error=mesh_client_error("Network error"))
+    forwarder = build_forwarder(incoming_messages=[mock_message])
+
+    with pytest.raises(RetryableException) as e:
+        forwarder.forward_messages()
+
+    assert e.value.error_message == "Network error"
+
+
+def test_records_error_when_mesh_message_ack_raises_mesh_network_exception():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.side_effect = [MagicMock(), observation]
+
+    mock_message = mock_mesh_message(
+        message_id="abc",
+        file_name="a_file.dat",
+        sender="mesh123",
+        recipient="mesh456",
+        acknowledge_error=mesh_client_error("Network error"),
+    )
+
+    forwarder = build_forwarder(incoming_messages=[mock_message], probe=probe)
+
+    with pytest.raises(RetryableException):
+        forwarder.forward_messages()
+
+    probe.start_observation.assert_called_with(FORWARD_MESSAGE_EVENT)
+
+    observation.assert_has_calls(
+        [
+            call.add_field("messageId", "abc"),
+            call.add_field("sender", "mesh123"),
+            call.add_field("recipient", "mesh456"),
+            call.add_field("fileName", "a_file.dat"),
+            call.add_field("error", MESH_CLIENT_NETWORK_ERROR),
+            call.add_field(
+                "errorMessage",
+                "Network error",
+            ),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
 def test_records_mesh_error_when_polling_messages():
     probe = MagicMock()
     observation = MagicMock()
