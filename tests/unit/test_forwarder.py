@@ -302,22 +302,18 @@ def test_records_error_when_message_has_invalid_header():
 
 
 def test_raises_retryable_exception_when_inbox_read_messages_raises_mesh_network_exception():
-    forwarder = build_forwarder(read_error=mesh_client_error("Network error"))
+    forwarder = build_forwarder(read_error=mesh_client_error())
 
-    with pytest.raises(RetryableException) as e:
+    with pytest.raises(RetryableException):
         forwarder.forward_messages()
-
-    assert e.value.error_message == "Network error"
 
 
 def test_raises_retryable_exception_when_mesh_message_ack_raises_mesh_network_exception():
-    mock_message = mock_mesh_message(acknowledge_error=mesh_client_error("Network error"))
+    mock_message = mock_mesh_message(acknowledge_error=mesh_client_error())
     forwarder = build_forwarder(incoming_messages=[mock_message])
 
-    with pytest.raises(RetryableException) as e:
+    with pytest.raises(RetryableException):
         forwarder.forward_messages()
-
-    assert e.value.error_message == "Network error"
 
 
 def test_records_error_when_mesh_message_ack_raises_mesh_network_exception():
@@ -393,12 +389,10 @@ def test_returns_true_if_mailbox_is_empty():
 
 
 def test_raises_retryable_exception_when_inbox_count_messages_raises_mesh_network_exception():
-    forwarder = build_forwarder(count_error=mesh_client_error("Network error"))
+    forwarder = build_forwarder(count_error=mesh_client_error())
 
-    with pytest.raises(RetryableException) as e:
+    with pytest.raises(RetryableException):
         forwarder.is_mailbox_empty()
-
-    assert e.value.error_message == "Network error"
 
 
 def test_records_counting_progress():

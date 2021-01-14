@@ -13,8 +13,6 @@ from s3mesh.s3 import S3Uploader
 
 logger = logging.getLogger(__name__)
 
-RETRYABLE_ERROR = "RETRYABLE_ERROR"
-
 
 @dataclass
 class MeshConfig:
@@ -52,8 +50,7 @@ class MeshToS3ForwarderService:
 
                 if self._forwarder.is_mailbox_empty():
                     self._exit_event.wait(self._poll_frequency_sec)
-            except RetryableException as e:
-                logger.info(RETRYABLE_ERROR, extra={"errorMessage": e.error_message})
+            except RetryableException:
                 self._exit_event.wait(self._poll_frequency_sec)
         logger.info("Exiting forwarder service")
 

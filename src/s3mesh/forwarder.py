@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class RetryableException(Exception):
-    def __init__(self, message=None):
-        self.error_message = message
+    pass
 
 
 class MeshToS3Forwarder:
@@ -38,7 +37,7 @@ class MeshToS3Forwarder:
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
-            raise RetryableException(e.error_message)
+            raise RetryableException()
         finally:
             observation.finish()
 
@@ -51,7 +50,7 @@ class MeshToS3Forwarder:
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
-            raise RetryableException(e.error_message)
+            raise RetryableException()
         finally:
             observation.finish()
 
@@ -87,6 +86,6 @@ class MeshToS3Forwarder:
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
             observation.add_field("errorMessage", e.error_message)
-            raise RetryableException(e.error_message)
+            raise RetryableException()
         finally:
             observation.finish()
