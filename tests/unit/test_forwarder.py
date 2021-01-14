@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, call
 import pytest
 
 from s3mesh.forwarder import (
+    COUNT_MESSAGES_EVENT,
     FORWARD_MESSAGE_EVENT,
     INVALID_MESH_HEADER_ERROR,
     MESH_CLIENT_NETWORK_ERROR,
@@ -380,19 +381,13 @@ def test_records_mesh_error_when_polling_messages():
 
 
 def test_returns_false_if_mailbox_is_not_empty():
-    mesh_inbox = MagicMock()
-    mesh_inbox.count_messages.return_value = 1
-
-    forwarder = build_forwarder(mesh_inbox=mesh_inbox)
+    forwarder = build_forwarder(inbox_message_count=1)
 
     assert forwarder.is_mailbox_empty() is False
 
 
 def test_returns_true_if_mailbox_is_empty():
-    mesh_inbox = MagicMock()
-    mesh_inbox.count_messages.return_value = 0
-
-    forwarder = build_forwarder(mesh_inbox=mesh_inbox)
+    forwarder = build_forwarder(inbox_message_count=0)
 
     assert forwarder.is_mailbox_empty() is True
 
@@ -404,3 +399,46 @@ def test_raises_retryable_exception_when_inbox_count_messages_raises_mesh_networ
         forwarder.is_mailbox_empty()
 
     assert e.value.error_message == "Network error"
+
+
+def test_records_counting_progress():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    forwarder = build_forwarder(inbox_message_count=3, probe=probe)
+
+    forwarder.is_mailbox_empty()
+
+    probe.start_observation.assert_called_once_with(COUNT_MESSAGES_EVENT)
+    observation.assert_has_calls(
+        [
+            call.add_field("countedMessages", 3),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_records_mesh_error_when_counting_messages():
+    probe = MagicMock()
+    observation = MagicMock()
+    probe.start_observation.return_value = observation
+
+    forwarder = build_forwarder(count_error=mesh_client_error("Network error"), probe=probe)
+
+    with pytest.raises(RetryableException):
+        forwarder.is_mailbox_empty()
+
+    probe.start_observation.assert_called_once_with(COUNT_MESSAGES_EVENT)
+    observation.assert_has_calls(
+        [
+            call.add_field("error", MESH_CLIENT_NETWORK_ERROR),
+            call.add_field(
+                "errorMessage",
+                "Network error",
+            ),
+            call.finish(),
+        ],
+        any_order=False,
+    )

@@ -9,6 +9,7 @@ MISSING_MESH_HEADER_ERROR = "MISSING_MESH_HEADER"
 MESH_CLIENT_NETWORK_ERROR = "MESH_CLIENT_NETWORK_ERROR"
 FORWARD_MESSAGE_EVENT = "FORWARD_MESH_MESSAGE"
 POLL_MESSAGE_EVENT = "POLL_MESSAGE"
+COUNT_MESSAGES_EVENT = "COUNT_MESSAGES"
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +30,17 @@ class MeshToS3Forwarder:
             self._process_message(message)
 
     def is_mailbox_empty(self):
+        observation = self._new_count_messages_observation()
         try:
-            return self._inbox.count_messages() == 0
+            message_count = self._inbox.count_messages()
+            observation.add_field("countedMessages", message_count)
+            return message_count == 0
         except MeshClientNetworkError as e:
+            observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
+            observation.add_field("errorMessage", e.error_message)
             raise RetryableException(e.error_message)
+        finally:
+            observation.finish()
 
     def _poll_messages(self):
         observation = self._new_poll_message_observation()
@@ -54,6 +62,10 @@ class MeshToS3Forwarder:
 
     def _new_poll_message_observation(self):
         observation = self._probe.start_observation(POLL_MESSAGE_EVENT)
+        return observation
+
+    def _new_count_messages_observation(self):
+        observation = self._probe.start_observation(COUNT_MESSAGES_EVENT)
         return observation
 
     def _process_message(self, message):
