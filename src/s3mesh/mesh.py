@@ -12,22 +12,9 @@ MESH_STATUS_SUCCESS = "SUCCESS"
 logger = logging.getLogger(__name__)
 
 
-def _invoke_client_method(client_method: Callable[[], Any]):
+def _invoke_http_method(client_method: Callable[[], Any]):
     try:
         return client_method()
-    except HTTPError as e:
-        raise MeshClientNetworkError(
-            f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
-        )
-    except ConnectionError as e:
-        raise MeshClientNetworkError(
-            f"ConnectionError received when attempting to connect to: {e.request.url}"
-        )
-
-
-def _invoke_client_iterator(client_method):
-    try:
-        yield from client_method()
     except HTTPError as e:
         raise MeshClientNetworkError(
             f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
@@ -75,7 +62,7 @@ class MeshMessage:
             raise UnexpectedMessageType(header_value)
 
     def acknowledge(self):
-        _invoke_client_method(self._client_message.acknowledge)
+        _invoke_http_method(self._client_message.acknowledge)
 
     def read(self, n=None):
         return self._client_message.read(n)
@@ -85,14 +72,16 @@ class MeshInbox:
     def __init__(self, client: MeshClient):
         self._client = client
 
-    def read_messages(self) -> List[MeshMessage]:
+    def _read_messages(self):
         return [
-            MeshMessage(client_message)
-            for client_message in _invoke_client_iterator(self._client.iterate_all_messages)
+            MeshMessage(client_message) for client_message in self._client.iterate_all_messages()
         ]
 
+    def read_messages(self) -> List[MeshMessage]:
+        return _invoke_http_method(self._read_messages)
+
     def count_messages(self) -> int:
-        return _invoke_client_method(self._client.count_messages)
+        return _invoke_http_method(self._client.count_messages)
 
 
 class MeshClientNetworkError(Exception):
