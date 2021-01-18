@@ -65,7 +65,7 @@ do
         image_tag=${commit_hash}
         docker build -t ${repository_uri}:latest -t ${repository_uri}:${image_tag} .
         eval $(docker_login)
-        docker push ${repository_uri}
+        docker push ${repository_uri}:${image_tag}
     ;;
     *)
         echo "Invalid command: '${command}'"
