@@ -25,6 +25,19 @@ def _invoke_client_method(client_method: Callable[[], Any]):
         )
 
 
+def _invoke_client_iterator(client_method):
+    try:
+        yield from client_method()
+    except HTTPError as e:
+        raise MeshClientNetworkError(
+            f"{e.response.status_code} HTTP Error: {e.response.reason}: {e.response.url}"
+        )
+    except ConnectionError as e:
+        raise MeshClientNetworkError(
+            f"ConnectionError received when attempting to connect to: {e.request.url}"
+        )
+
+
 class MeshMessage:
     def __init__(self, client_message: Message):
         self.id: str = client_message.id()
@@ -75,7 +88,7 @@ class MeshInbox:
     def read_messages(self) -> List[MeshMessage]:
         return [
             MeshMessage(client_message)
-            for client_message in _invoke_client_method(self._client.iterate_all_messages)
+            for client_message in _invoke_client_iterator(self._client.iterate_all_messages)
         ]
 
     def count_messages(self) -> int:
