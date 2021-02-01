@@ -32,7 +32,7 @@ class MeshToS3Forwarder:
         observation = self._new_count_messages_observation()
         try:
             message_count = self._inbox.count_messages()
-            observation.add_field("countedMessages", message_count)
+            observation.add_field("inboxMessageCount", message_count)
             return message_count == 0
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
@@ -45,7 +45,7 @@ class MeshToS3Forwarder:
         observation = self._new_poll_message_observation()
         try:
             messages = self._inbox.read_messages()
-            observation.add_field("polledMessages", len(messages))
+            observation.add_field("batchMessageCount", len(messages))
             return messages
         except MeshClientNetworkError as e:
             observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)

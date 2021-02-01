@@ -210,7 +210,7 @@ def test_records_message_progress():
         [call(POLL_MESSAGE_EVENT), call(FORWARD_MESSAGE_EVENT)], any_order=False
     )
     poll_observation.assert_has_calls(
-        [call.add_field("polledMessages", 1), call.finish()], any_order=False
+        [call.add_field("batchMessageCount", 1), call.finish()], any_order=False
     )
     forward_observation.assert_has_calls(
         [
@@ -407,7 +407,7 @@ def test_records_counting_progress():
     probe.start_observation.assert_called_once_with(COUNT_MESSAGES_EVENT)
     observation.assert_has_calls(
         [
-            call.add_field("countedMessages", 3),
+            call.add_field("inboxMessageCount", 3),
             call.finish(),
         ],
         any_order=False,
