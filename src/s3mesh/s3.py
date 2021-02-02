@@ -8,6 +8,7 @@ class S3Uploader:
         self._bucket_name = bucket_name
 
     def upload(self, message: MeshMessage, observation: LoggingObservation):
-        key = f"{message.date_delivered.strftime('%Y/%m/%d')}/{message.file_name}"
+        s3_file_name = message.file_name.replace(" ", "_")
+        key = f"{message.date_delivered.strftime('%Y/%m/%d')}/{s3_file_name}"
         self._s3_client.upload_fileobj(message, self._bucket_name, key)
         observation.add_field("s3Key", key)
