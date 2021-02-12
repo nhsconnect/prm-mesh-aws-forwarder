@@ -22,7 +22,7 @@ do
   echo "--- ${command} ---"
   case "${command}" in
     test)
-        tox -e py38
+        tox -e py39
         ;;
     format)
         tox -e format
