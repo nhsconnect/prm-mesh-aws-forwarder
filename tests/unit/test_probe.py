@@ -1,19 +1,6 @@
-import logging
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call
 
-from s3mesh.probe import LoggingObservation, LoggingProbe
-
-
-def test_observation_receives_name_from_probe():
-    event_name = "an_event"
-    probe = LoggingProbe()
-    observation = probe.start_observation(event_name)
-
-    logger = logging.getLogger("s3mesh.probe")
-    with patch.object(logger, "info") as mock_info:
-        observation.finish()
-
-    mock_info.assert_called_once_with(f"Observed {event_name}", extra={"event": event_name})
+from s3mesh.probe import LoggingObservation
 
 
 def test_logs_single_observation():

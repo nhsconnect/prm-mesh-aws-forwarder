@@ -1,7 +1,7 @@
 import logging
 
 from s3mesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshInbox, MissingMeshHeader
-from s3mesh.probe import LoggingProbe
+from s3mesh.monitoring.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
 
 INVALID_MESH_HEADER_ERROR = "INVALID_MESH_HEADER"

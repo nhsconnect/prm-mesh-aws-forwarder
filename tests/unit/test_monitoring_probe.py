@@ -25,3 +25,15 @@ def test_binds_count_messages_event_to_logger():
     count_messages_event.finish()
 
     mock_logger.info.assert_called_once_with("Observed COUNT_MESSAGES", extra={})
+
+
+def test_observation_receives_name_from_probe():
+    event_name = "an_event"
+    probe = LoggingProbe()
+    observation = probe.start_observation(event_name)
+
+    logger = logging.getLogger("s3mesh.monitoring.probe")
+    with patch.object(logger, "info") as mock_info:
+        observation.finish()
+
+    mock_info.assert_called_once_with(f"Observed {event_name}", extra={"event": event_name})

@@ -4,11 +4,6 @@ from typing import Dict
 logger = getLogger(__name__)
 
 
-class LoggingProbe:
-    def start_observation(self, event_name):
-        return LoggingObservation(event_name, logger)
-
-
 class LoggingObservation:
     def __init__(self, event_name: str, logger: Logger):
         self._logger = logger
