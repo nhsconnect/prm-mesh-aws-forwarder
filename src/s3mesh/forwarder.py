@@ -29,17 +29,16 @@ class MeshToS3Forwarder:
             self._process_message(message)
 
     def is_mailbox_empty(self):
-        observation = self._new_count_messages_observation()
+        count_message_event = self._probe.new_count_messages_event()
         try:
             message_count = self._inbox.count_messages()
-            observation.add_field("inboxMessageCount", message_count)
+            count_message_event.record_message_count(message_count)
             return message_count == 0
         except MeshClientNetworkError as e:
-            observation.add_field("error", MESH_CLIENT_NETWORK_ERROR)
-            observation.add_field("errorMessage", e.error_message)
+            count_message_event.record_mesh_client_network_error(e)
             raise RetryableException()
         finally:
-            observation.finish()
+            count_message_event.finish()
 
     def _poll_messages(self):
         observation = self._new_poll_message_observation()

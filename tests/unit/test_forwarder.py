@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, call
 import pytest
 
 from s3mesh.forwarder import (
-    COUNT_MESSAGES_EVENT,
     FORWARD_MESSAGE_EVENT,
     INVALID_MESH_HEADER_ERROR,
     MESH_CLIENT_NETWORK_ERROR,
@@ -395,44 +394,35 @@ def test_raises_retryable_exception_when_inbox_count_messages_raises_mesh_networ
         forwarder.is_mailbox_empty()
 
 
-def test_records_counting_progress():
+def test_records_inbox_message_count():
     probe = MagicMock()
-    observation = MagicMock()
-    probe.start_observation.return_value = observation
 
     forwarder = build_forwarder(inbox_message_count=3, probe=probe)
 
     forwarder.is_mailbox_empty()
 
-    probe.start_observation.assert_called_once_with(COUNT_MESSAGES_EVENT)
-    observation.assert_has_calls(
+    probe.assert_has_calls(
         [
-            call.add_field("inboxMessageCount", 3),
-            call.finish(),
-        ],
-        any_order=False,
+            call.new_count_messages_event(),
+            call.new_count_messages_event().record_message_count(3),
+            call.new_count_messages_event().finish(),
+        ]
     )
 
 
 def test_records_mesh_error_when_counting_messages():
     probe = MagicMock()
-    observation = MagicMock()
-    probe.start_observation.return_value = observation
 
-    forwarder = build_forwarder(count_error=mesh_client_error("Network error"), probe=probe)
+    network_error = mesh_client_error("Network error")
+    forwarder = build_forwarder(count_error=network_error, probe=probe)
 
     with pytest.raises(RetryableException):
         forwarder.is_mailbox_empty()
 
-    probe.start_observation.assert_called_once_with(COUNT_MESSAGES_EVENT)
-    observation.assert_has_calls(
+    probe.assert_has_calls(
         [
-            call.add_field("error", MESH_CLIENT_NETWORK_ERROR),
-            call.add_field(
-                "errorMessage",
-                "Network error",
-            ),
-            call.finish(),
-        ],
-        any_order=False,
+            call.new_count_messages_event(),
+            call.new_count_messages_event().record_mesh_client_network_error(network_error),
+            call.new_count_messages_event().finish(),
+        ]
     )
