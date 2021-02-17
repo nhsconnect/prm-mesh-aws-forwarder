@@ -9,7 +9,6 @@ MISSING_MESH_HEADER_ERROR = "MISSING_MESH_HEADER"
 MESH_CLIENT_NETWORK_ERROR = "MESH_CLIENT_NETWORK_ERROR"
 FORWARD_MESSAGE_EVENT = "FORWARD_MESH_MESSAGE"
 POLL_MESSAGE_EVENT = "POLL_MESSAGE"
-COUNT_MESSAGES_EVENT = "COUNT_MESSAGES"
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +59,6 @@ class MeshToS3Forwarder:
 
     def _new_poll_message_observation(self):
         observation = self._probe.start_observation(POLL_MESSAGE_EVENT)
-        return observation
-
-    def _new_count_messages_observation(self):
-        observation = self._probe.start_observation(COUNT_MESSAGES_EVENT)
         return observation
 
     def _process_message(self, message):
