@@ -4,8 +4,9 @@ from s3mesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR
 from s3mesh.monitoring.event.count import COUNT_MESSAGES_EVENT, CountMessagesEvent
 
 
-def test_finish_calls_log_count_message_event():
+def test_finish_calls_log_event_with_event_name():
     mock_output = MagicMock()
+
     count_messages_event = CountMessagesEvent(mock_output)
     count_messages_event.finish()
 
@@ -15,6 +16,7 @@ def test_finish_calls_log_count_message_event():
 def test_record_message_count_records_inbox_message_count():
     mock_output = MagicMock()
     message_count = 2
+
     count_messages_event = CountMessagesEvent(mock_output)
     count_messages_event.record_message_count(message_count)
     count_messages_event.finish()
@@ -29,6 +31,7 @@ def test_record_mesh_client_network_error_records_error_details():
     error_message = "Oh no!"
     mock_exception = MagicMock()
     mock_exception.error_message = error_message
+
     count_messages_event = CountMessagesEvent(mock_output)
     count_messages_event.record_mesh_client_network_error(mock_exception)
     count_messages_event.finish()
