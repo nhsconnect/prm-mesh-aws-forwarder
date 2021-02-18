@@ -13,10 +13,6 @@ function get_aws_account_id {
   dojo -c Dojofile-infra "aws sts get-caller-identity --query Account --output text"
 }
 
-function get_latest_commit_hash {
-  git rev-parse HEAD | cut -c 1-7
-}
-
 for command in "$@"
 do
   echo "--- ${command} ---"
@@ -58,11 +54,15 @@ do
     devenv)
         tox --recreate --devenv venv
         ;;
-    build-docker)
+    publish-docker)
+        image_tag=$2
+        if [ -z $image_tag ]; then
+            echo "Please supply image tag"
+            echo "Usage: ./tasks publish-docker an-image-tag"
+            exit 1
+        fi
         aws_account_id=$(get_aws_account_id)
         repository_uri=${aws_account_id}.dkr.ecr.${aws_region}.amazonaws.com/${image_repo_name}
-        commit_hash=$(get_latest_commit_hash)
-        image_tag=${commit_hash}
         docker build -t ${repository_uri}:latest -t ${repository_uri}:${image_tag} .
         eval $(docker_login)
         docker push ${repository_uri}:${image_tag}

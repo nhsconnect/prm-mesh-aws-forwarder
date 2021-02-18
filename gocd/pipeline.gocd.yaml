@@ -30,4 +30,4 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks build-docker
+                      - ./tasks publish-docker $GO_PIPELINE_LABEL
