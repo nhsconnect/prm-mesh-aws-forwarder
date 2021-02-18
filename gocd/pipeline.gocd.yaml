@@ -30,4 +30,4 @@ pipelines:
                     command: /bin/bash
                     arguments:
                       - -c
-                      - ./tasks publish-docker $GO_PIPELINE_LABEL
+                      - IMAGE_TAG=$GO_PIPELINE_LABEL ./tasks publish-docker
