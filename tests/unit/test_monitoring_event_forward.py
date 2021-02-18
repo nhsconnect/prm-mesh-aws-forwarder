@@ -30,3 +30,14 @@ def test_record_message_metadata():
             "fileName": message.file_name,
         },
     )
+
+
+def test_record_s3_key():
+    mock_output = MagicMock()
+    key = "/a/key"
+
+    forward_message_event = ForwardMessageEvent(mock_output)
+    forward_message_event.record_s3_key(key)
+    forward_message_event.finish()
+
+    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"s3Key": key})

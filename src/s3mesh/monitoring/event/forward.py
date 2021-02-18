@@ -14,5 +14,8 @@ class ForwardMessageEvent:
         self._fields["recipient"] = message.recipient
         self._fields["fileName"] = message.file_name
 
+    def record_s3_key(self, key):
+        self._fields["s3Key"] = key
+
     def finish(self):
         self._output.log_event(FORWARD_MESSAGE_EVENT, self._fields)
