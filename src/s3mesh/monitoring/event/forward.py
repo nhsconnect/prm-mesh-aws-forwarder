@@ -1,17 +1,13 @@
-from s3mesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshMessage, MissingMeshHeader
-from s3mesh.monitoring.error import (
-    INVALID_MESH_HEADER_ERROR,
-    MESH_CLIENT_NETWORK_ERROR,
-    MISSING_MESH_HEADER_ERROR,
-)
+from s3mesh.mesh import InvalidMeshHeader, MeshMessage, MissingMeshHeader
+from s3mesh.monitoring.error import INVALID_MESH_HEADER_ERROR, MISSING_MESH_HEADER_ERROR
+from s3mesh.monitoring.event.base import ForwarderEvent
 
 FORWARD_MESSAGE_EVENT = "FORWARD_MESH_MESSAGE"
 
 
-class ForwardMessageEvent:
+class ForwardMessageEvent(ForwarderEvent):
     def __init__(self, output):
-        self._fields = {}
-        self._output = output
+        super().__init__(output, FORWARD_MESSAGE_EVENT)
 
     def record_message_metadata(self, message: MeshMessage):
         self._fields["messageId"] = message.id
@@ -31,10 +27,3 @@ class ForwardMessageEvent:
         self._fields["headerName"] = exception.header_name
         self._fields["expectedHeaderValue"] = exception.expected_header_value
         self._fields["receivedHeaderValue"] = exception.header_value
-
-    def record_mesh_client_network_error(self, exception: MeshClientNetworkError):
-        self._fields["error"] = MESH_CLIENT_NETWORK_ERROR
-        self._fields["errorMessage"] = exception.error_message
-
-    def finish(self):
-        self._output.log_event(FORWARD_MESSAGE_EVENT, self._fields)
