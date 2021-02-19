@@ -12,7 +12,9 @@ def test_uses_default_logger():
         count_messages_event = probe.new_count_messages_event()
         count_messages_event.finish()
 
-        mock_info.assert_called_once_with("Observed COUNT_MESSAGES", extra={})
+        mock_info.assert_called_once_with(
+            "Observed COUNT_MESSAGES", extra={"event": "COUNT_MESSAGES"}
+        )
 
 
 def test_binds_count_messages_event_to_logger():
@@ -24,7 +26,9 @@ def test_binds_count_messages_event_to_logger():
 
     count_messages_event.finish()
 
-    mock_logger.info.assert_called_once_with("Observed COUNT_MESSAGES", extra={})
+    mock_logger.info.assert_called_once_with(
+        "Observed COUNT_MESSAGES", extra={"event": "COUNT_MESSAGES"}
+    )
 
 
 def test_observation_receives_name_from_probe():

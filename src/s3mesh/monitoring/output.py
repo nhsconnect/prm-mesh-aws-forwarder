@@ -6,4 +6,5 @@ class LoggingOutput:
         self._logger = log
 
     def log_event(self, event_name: str, fields: dict):
-        self._logger.info(f"Observed {event_name}", extra=fields)
+        extra_fields = {**fields, "event": event_name}
+        self._logger.info(f"Observed {event_name}", extra=extra_fields)
