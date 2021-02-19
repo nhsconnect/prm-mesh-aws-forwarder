@@ -1,7 +1,11 @@
 from mock import MagicMock
 
-from s3mesh.forwarder import INVALID_MESH_HEADER_ERROR, MISSING_MESH_HEADER_ERROR
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
+from s3mesh.monitoring.error import (
+    INVALID_MESH_HEADER_ERROR,
+    MESH_CLIENT_NETWORK_ERROR,
+    MISSING_MESH_HEADER_ERROR,
+)
 from s3mesh.monitoring.event.forward import FORWARD_MESSAGE_EVENT, ForwardMessageEvent
 from tests.builders.common import a_string
 from tests.builders.mesh import mock_mesh_message
@@ -81,4 +85,19 @@ def test_record_invalid_mesh_header():
             "expectedHeaderValue": invalid_header_exception.expected_header_value,
             "receivedHeaderValue": invalid_header_exception.header_value,
         },
+    )
+
+
+def test_record_mesh_client_network_error():
+    mock_output = MagicMock()
+    error_message = "Oh no!"
+    mock_exception = MagicMock()
+    mock_exception.error_message = error_message
+
+    forward_message_event = ForwardMessageEvent(mock_output)
+    forward_message_event.record_mesh_client_network_error(mock_exception)
+    forward_message_event.finish()
+
+    mock_output.log_event.assert_called_with(
+        FORWARD_MESSAGE_EVENT, {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message}
     )
