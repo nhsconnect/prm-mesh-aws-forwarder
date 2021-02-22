@@ -31,13 +31,29 @@ def test_binds_count_messages_event_to_logger():
     )
 
 
-def test_observation_receives_name_from_probe():
-    event_name = "an_event"
-    probe = LoggingProbe()
-    observation = probe.start_observation(event_name)
+def test_binds_forward_message_event_to_logger():
+    mock_logger = MagicMock()
 
-    logger = logging.getLogger("s3mesh.monitoring.probe")
-    with patch.object(logger, "info") as mock_info:
-        observation.finish()
+    probe = LoggingProbe(mock_logger)
 
-    mock_info.assert_called_once_with(f"Observed {event_name}", extra={"event": event_name})
+    forward_message_event = probe.new_forward_message_event()
+
+    forward_message_event.finish()
+
+    mock_logger.info.assert_called_once_with(
+        "Observed FORWARD_MESH_MESSAGE", extra={"event": "FORWARD_MESH_MESSAGE"}
+    )
+
+
+def test_binds_poll_message_event_to_logger():
+    mock_logger = MagicMock()
+
+    probe = LoggingProbe(mock_logger)
+
+    forward_message_event = probe.new_poll_inbox_event()
+
+    forward_message_event.finish()
+
+    mock_logger.info.assert_called_once_with(
+        "Observed POLL_MESSAGE", extra={"event": "POLL_MESSAGE"}
+    )

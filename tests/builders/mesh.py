@@ -65,6 +65,7 @@ def mock_mesh_message(**kwargs):
     message.recipient = kwargs.get("recipient", a_string())
     message.validate.side_effect = kwargs.get("validation_error", None)
     message.acknowledge.side_effect = kwargs.get("acknowledge_error", None)
+    message.date_delivered = kwargs.get("date_delivered", a_datetime())
     return message
 
 
