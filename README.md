@@ -6,7 +6,7 @@ Generic MESH to S3 forwarder, capable of reading messages from a MESH inbox and 
 
 Install with `python setup.py install`.
 
-The MESH to S3 forwarder can then be started with `python -m s3mesh.entrypoint`
+The MESH to S3 forwarder can then be started with `python -m s3mesh.entrypoint`.
 
 Running the forwarder requires the following environment variables to be set:
 
