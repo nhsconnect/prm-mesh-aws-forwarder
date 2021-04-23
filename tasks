@@ -54,6 +54,12 @@ do
     devenv)
         tox --recreate --devenv venv
         ;;
+    dep)
+        ./tasks check-deps > audit-output.txt
+        ;;
+    dojo-dep)
+        dojo "./tasks dep"
+        ;;
     publish-docker)
         if [ -z $IMAGE_TAG ]; then
             echo "Please set IMAGE_TAG environment variable"
