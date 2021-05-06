@@ -18,29 +18,30 @@ do
   echo "--- ${command} ---"
   case "${command}" in
     test)
-        tox -e py39
+        pipenv run test
         ;;
     format)
-        tox -e format
+        pipenv run format-import
+        pipenv run format
         ;;
     check-format)
-        tox -e check-format
+        pipenv run check-format
         ;;
     lint)
-        tox -e flake8
-        tox -e bandit
+        pipenv run lint-flake8
+        pipenv run lint-bandit
         ;;
     typecheck)
-        tox -e mypy
+        pipenv run typecheck
         ;;
     check-deps)
-        tox -e check-deps
+        pipenv check
         ;;
     validate)
         ./tasks check-format typecheck lint test
         ;;
     dojo-validate)
-        dojo "./tasks validate"
+        dojo "./tasks devenv validate"
         ;;
     clean)
         find ./tests -type f -name "*.pyc" -delete
@@ -52,13 +53,15 @@ do
         rm -rf build/ dist/ .pytest_cache/
         ;;
     devenv)
-        tox --recreate --devenv venv
+        echo "./tasks validate" > .git/hooks/pre-commit
+        chmod +x .git/hooks/pre-commit
+        pipenv install -d
         ;;
     dep)
         ./tasks check-deps > audit-output.txt
         ;;
     dojo-dep)
-        dojo "./tasks dep"
+        dojo "./tasks devenv dep"
         ;;
     publish-docker)
         if [ -z $IMAGE_TAG ]; then

@@ -30,14 +30,36 @@ In order to get started with development, you will need Python - version 3.9 or 
 
 To run the tests in the same container image used in the CI pipeline, you will need:
 - [dojo](https://github.com/kudulab/dojo) 
-- Docker - version 3.1.0 or higher
+- [Docker](https://www.docker.com/get-started) - version 3.1.0 or higher
+- Python 3.9. Use [pyenv](https://github.com/pyenv/pyenv) to easily switch Python versions.
+- [Pipenv](https://pypi.org/project/pipenv/). Install by running `python -m pip install pipenv`
 
 ### Instructions for developing
 
 1. From the base directory of the project, create a python3 virtual environment and activate it:
  ```sh
  ./tasks devenv
- source ./venv/bin/activate
+ pipenv shell
  ```
  
 2. Run `./tasks validate` to run formatting, e2e tests and unit tests. This should be done before commiting.
+
+### Troubleshooting
+
+#### Checking dependencies fails locally due to pip
+
+If running `./tasks check-deps` fails due to an outdated version of pip, yet works when running it in dojo (i.e. `./tasks dojo-deps`), then the local python environment containing pipenv may need to be updated (using pyenv instead of brew - to better control the pip version).
+Ensure you have pyenv installed (use `brew install pyenv`).
+Perform the following steps:
+
+1. Run `brew uninstall pipenv`
+2. Run `pyenv install <required-python-version>`
+3. Follow step 3 from [here](https://github.com/pyenv/pyenv#basic-github-checkout )  
+4. Run `pyenv global <required-python-version>`
+5. For the following steps open another terminal.   
+6. Run `python -m pip install pipenv` to install pipenv using the updated python environment.
+7. Run `python -m pip install -U "pip>=<required-pip-version>"`
+8. Now running `./tasks check-deps` should pass.
+   - `pyenv global` should output the specific python version specified rather than `system`.
+   - Both `python --version` and `pip --version` should point to the versions you have specified.
+   - `ls -l $(which pipenv)` should output `.../.pyenv/shims/pipenv` rather than `...Cellar...` (which is a brew install).
