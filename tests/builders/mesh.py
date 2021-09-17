@@ -86,10 +86,10 @@ def mesh_client_http_error():
     return HTTPError(response=response)
 
 
-def mesh_client_connection_error():
+def mesh_client_connection_error(message):
     request = Request()
     request.url = TEST_INBOX_URL
-    return ConnectionError(request=request)
+    return ConnectionError(message, request=request)
 
 
 def mesh_client_error(error_message="A message"):

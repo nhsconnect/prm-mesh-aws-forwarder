@@ -303,7 +303,7 @@ def test_mesh_network_error_raised_when_ack_raises_http_error():
 
 
 def test_mesh_network_error_raised_when_ack_raises_connection_error():
-    client_message = mock_client_message(acknowledge_error=mesh_client_connection_error())
+    client_message = mock_client_message(acknowledge_error=mesh_client_connection_error("an error"))
 
     message = MeshMessage(client_message)
 
@@ -312,4 +312,5 @@ def test_mesh_network_error_raised_when_ack_raises_connection_error():
 
     assert e.value.error_message == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+        " caused by: an error"
     )

@@ -23,6 +23,7 @@ def _wrap_http_errors(func: Callable[[Any], Any]):
         except ConnectionError as e:
             raise MeshClientNetworkError(
                 f"ConnectionError received when attempting to connect to: {e.request.url}"
+                f" caused by: {e}"
             )
 
     return wrapper_function

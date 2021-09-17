@@ -41,7 +41,7 @@ def test_raises_network_error_when_iterating_all_messages_raises_an_http_error()
 
 def test_raises_network_error_when_iterating_all_messages_raises_a_connection_error():
     def mock_iterate_all_messages():
-        raise mesh_client_connection_error()
+        raise mesh_client_connection_error("an error")
         yield mock_client_message()
 
     client_inbox = MagicMock()
@@ -54,6 +54,7 @@ def test_raises_network_error_when_iterating_all_messages_raises_a_connection_er
 
     assert e.value.error_message == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+        " caused by: an error"
     )
 
 
@@ -67,11 +68,12 @@ def test_raises_network_error_when_counting_messages_raises_an_http_error():
 
 
 def test_raises_network_error_when_counting_messages_raises_a_connection_error():
-    mesh_inbox = mock_mesh_inbox(count_messages_error=mesh_client_connection_error())
+    mesh_inbox = mock_mesh_inbox(count_messages_error=mesh_client_connection_error("an error"))
 
     with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.count_messages()
 
     assert e.value.error_message == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+        " caused by: an error"
     )
