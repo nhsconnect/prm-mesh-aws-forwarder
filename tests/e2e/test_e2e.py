@@ -48,13 +48,9 @@ FAKE_MESH_URL = f"https://localhost:{FAKE_MESH_PORT}"
 FAKE_MESH_SHARED_KEY = a_string()
 FAKE_MESH_CLIENT_PASSWORD = a_string()
 
-FAKE_S3_HOST = "127.0.0.1"
-FAKE_S3_PORT = 8887
-FAKE_S3_URL = f"http://{FAKE_S3_HOST}:{FAKE_S3_PORT}"
-
-FAKE_SSM_HOST = "127.0.0.1"
-FAKE_SSM_PORT = 8886
-FAKE_SSM_URL = f"http://{FAKE_SSM_HOST}:{FAKE_SSM_PORT}"
+FAKE_AWS_HOST = "127.0.0.1"
+FAKE_AWS_PORT = 8887
+FAKE_AWS_URL = f"http://{FAKE_AWS_HOST}:{FAKE_AWS_PORT}"
 
 SENDING_MESH_MAILBOX = "e2e-test-mailbox-sender"
 RECEIVING_MESH_MAILBOX = "e2e-test-mailbox-receiver"
@@ -104,15 +100,9 @@ def _build_fake_mesh(mesh_dir):
     return ThreadedHttpd(httpd)
 
 
-def _build_fake_s3():
-    app = DomainDispatcherApplication(create_backend_app, "s3")
-    httpd = Server((FAKE_S3_HOST, FAKE_S3_PORT), app)
-    return ThreadedHttpd(httpd)
-
-
-def _build_fake_ssm():
-    app = DomainDispatcherApplication(create_backend_app, "ssm")
-    httpd = Server((FAKE_SSM_HOST, FAKE_SSM_PORT), app)
+def _build_fake_aws():
+    app = DomainDispatcherApplication(create_backend_app)
+    httpd = Server((FAKE_AWS_HOST, FAKE_AWS_PORT), app)
     return ThreadedHttpd(httpd)
 
 
@@ -128,8 +118,8 @@ def _build_forwarder(forwarder_home):
         "S3_BUCKET_NAME": S3_BUCKET,
         "POLL_FREQUENCY": "5",
         "FORWARDER_HOME": forwarder_home,
-        "S3_ENDPOINT_URL": FAKE_S3_URL,
-        "SSM_ENDPOINT_URL": FAKE_SSM_URL,
+        "S3_ENDPOINT_URL": FAKE_AWS_URL,
+        "SSM_ENDPOINT_URL": FAKE_AWS_URL,
     }
 
     forwarder = build_forwarder_from_environment_variables(env_config)
@@ -150,14 +140,14 @@ def _build_mesh_client():
 def _build_s3_resource():
     return boto3.resource(
         service_name="s3",
-        endpoint_url=FAKE_S3_URL,
+        endpoint_url=FAKE_AWS_URL,
     )
 
 
 def _build_ssm_client():
     return boto3.client(
         service_name="ssm",
-        endpoint_url=FAKE_SSM_URL,
+        endpoint_url=FAKE_AWS_URL,
     )
 
 
@@ -199,10 +189,8 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
     fake_mesh = _build_fake_mesh(fake_mesh_data_dir)
 
     fake_mesh.start()
-    fake_s3 = _build_fake_s3()
-    fake_s3.start()
-    fake_ssm = _build_fake_ssm()
-    fake_ssm.start()
+    fake_aws = _build_fake_aws()
+    fake_aws.start()
 
     mesh = _build_mesh_client()
     s3 = _build_s3_resource()
@@ -230,5 +218,4 @@ def test_mesh_inbox_s3_forwarder(tmpdir):
         forwarder.stop()
     finally:
         fake_mesh.stop()
-        fake_s3.stop()
-        fake_ssm.stop()
+        fake_aws.stop()
