@@ -50,6 +50,17 @@ def test_record_s3_key():
     mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"s3Key": key})
 
 
+def test_record_sns_message_id():
+    mock_output = MagicMock()
+    message_id = a_string()
+
+    forward_message_event = ForwardMessageEvent(mock_output)
+    forward_message_event.record_sns_message_id(message_id)
+    forward_message_event.finish()
+
+    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"snsMessageId": message_id})
+
+
 def test_record_missing_mesh_header():
     mock_output = MagicMock()
     missing_header_exception = MissingMeshHeader(header_name=a_string())

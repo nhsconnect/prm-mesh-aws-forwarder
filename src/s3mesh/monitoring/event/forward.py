@@ -18,6 +18,9 @@ class ForwardMessageEvent(ForwarderEvent):
     def record_s3_key(self, key):
         self._fields["s3Key"] = key
 
+    def record_sns_message_id(self, sns_message_id):
+        self._fields["snsMessageId"] = sns_message_id
+
     def record_missing_mesh_header(self, exception: MissingMeshHeader):
         self._fields["error"] = MISSING_MESH_HEADER_ERROR
         self._fields["missingHeaderName"] = exception.header_name
