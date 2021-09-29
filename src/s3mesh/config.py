@@ -26,9 +26,11 @@ class ForwarderConfig:
     mesh_client_cert_ssm_param_name: str
     mesh_client_key_ssm_param_name: str
     mesh_ca_cert_ssm_param_name: str
-    s3_bucket_name: str
     poll_frequency: str
     forwarder_home: str
+    message_destination: str = "s3"
+    s3_bucket_name: Optional[str] = None
+    sns_topic_arn: Optional[str] = None
     s3_endpoint_url: Optional[str] = None
     ssm_endpoint_url: Optional[str] = None
 

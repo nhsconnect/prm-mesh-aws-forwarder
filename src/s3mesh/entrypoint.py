@@ -6,7 +6,7 @@ from signal import SIGINT, SIGTERM, signal
 import boto3
 
 from s3mesh.config import ForwarderConfig
-from s3mesh.forwarder_service import MeshConfig, S3Config, build_forwarder_service
+from s3mesh.forwarder_service import MeshConfig, MessageDestinationConfig, build_forwarder_service
 from s3mesh.logging import JsonFormatter
 from s3mesh.secrets import SsmSecretManager
 
@@ -37,13 +37,22 @@ def build_mesh_config_from_ssm(ssm, config) -> MeshConfig:
     )
 
 
+def build_message_destination_config(config) -> MessageDestinationConfig:
+    return MessageDestinationConfig(
+        message_destination=config.message_destination,
+        s3_bucket_name=config.s3_bucket_name,
+        s3_endpoint_url=config.s3_endpoint_url,
+        sns_topic_arn=config.sns_topic_arn,
+    )
+
+
 def build_forwarder_from_environment_variables(env_vars=environ):
     config = ForwarderConfig.from_environment_variables(env_vars)
     ssm = boto3.client("ssm", endpoint_url=config.ssm_endpoint_url)
 
     return build_forwarder_service(
         mesh_config=build_mesh_config_from_ssm(ssm, config),
-        s3_config=S3Config(bucket_name=config.s3_bucket_name, endpoint_url=config.s3_endpoint_url),
+        message_destination_config=build_message_destination_config(config),
         poll_frequency_sec=int(config.poll_frequency),
     )
 

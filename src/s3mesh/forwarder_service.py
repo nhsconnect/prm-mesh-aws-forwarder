@@ -26,9 +26,11 @@ class MeshConfig:
 
 
 @dataclass
-class S3Config:
-    bucket_name: str
-    endpoint_url: Optional[str]
+class MessageDestinationConfig:
+    message_destination: str
+    s3_bucket_name: Optional[str]
+    s3_endpoint_url: Optional[str]
+    sns_topic_arn: Optional[str]
 
 
 class MeshToS3ForwarderService:
@@ -61,11 +63,11 @@ class MeshToS3ForwarderService:
 
 def build_forwarder_service(
     mesh_config: MeshConfig,
-    s3_config: S3Config,
+    message_destination_config: MessageDestinationConfig,
     poll_frequency_sec,
 ) -> MeshToS3ForwarderService:
-    s3 = boto3.client(service_name="s3", endpoint_url=s3_config.endpoint_url)
-    uploader = S3Uploader(s3, s3_config.bucket_name)
+    s3 = boto3.client(service_name="s3", endpoint_url=message_destination_config.s3_endpoint_url)
+    uploader = S3Uploader(s3, message_destination_config.s3_bucket_name)
 
     mesh = mesh_client.MeshClient(
         mesh_config.url,
