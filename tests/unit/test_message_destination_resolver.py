@@ -2,8 +2,11 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from s3mesh.forwarder_service import MessageDestinationConfig
-from s3mesh.message_destination_resolver import UnknownMessageDestination, resolve_message_uploader
+from s3mesh.message_destination_resolver import (
+    MessageDestinationConfig,
+    UnknownMessageDestination,
+    resolve_message_uploader,
+)
 from s3mesh.s3 import S3Uploader
 from s3mesh.sns import SNSUploader
 

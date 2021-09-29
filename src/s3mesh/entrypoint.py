@@ -6,8 +6,9 @@ from signal import SIGINT, SIGTERM, signal
 import boto3
 
 from s3mesh.config import ForwarderConfig
-from s3mesh.forwarder_service import MeshConfig, MessageDestinationConfig, build_forwarder_service
+from s3mesh.forwarder_service import MeshConfig, build_forwarder_service
 from s3mesh.logging import JsonFormatter
+from s3mesh.message_destination_resolver import MessageDestinationConfig
 from s3mesh.secrets import SsmSecretManager
 
 

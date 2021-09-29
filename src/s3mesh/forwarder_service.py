@@ -3,13 +3,12 @@ from dataclasses import dataclass
 from threading import Event
 from typing import Optional
 
-import boto3
 import mesh_client
 
 from s3mesh.forwarder import MeshToS3Forwarder, RetryableException
 from s3mesh.mesh import MeshInbox
+from s3mesh.message_destination_resolver import MessageDestinationConfig, resolve_message_uploader
 from s3mesh.monitoring.probe import LoggingProbe
-from s3mesh.s3 import S3Uploader
 
 logger = logging.getLogger(__name__)
 
@@ -23,14 +22,6 @@ class MeshConfig:
     client_cert_path: str
     client_key_path: str
     ca_cert_path: str
-
-
-@dataclass
-class MessageDestinationConfig:
-    message_destination: str
-    s3_bucket_name: Optional[str]
-    s3_endpoint_url: Optional[str]
-    sns_topic_arn: Optional[str]
 
 
 class MeshToS3ForwarderService:
@@ -66,8 +57,7 @@ def build_forwarder_service(
     message_destination_config: MessageDestinationConfig,
     poll_frequency_sec,
 ) -> MeshToS3ForwarderService:
-    s3 = boto3.client(service_name="s3", endpoint_url=message_destination_config.s3_endpoint_url)
-    uploader = S3Uploader(s3, message_destination_config.s3_bucket_name)
+    uploader = resolve_message_uploader(message_destination_config)
 
     mesh = mesh_client.MeshClient(
         mesh_config.url,

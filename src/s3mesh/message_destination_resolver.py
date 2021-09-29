@@ -1,12 +1,20 @@
-from typing import Protocol
+from dataclasses import dataclass
+from typing import Optional, Protocol
 
 import boto3
 
-from s3mesh.forwarder_service import MessageDestinationConfig
 from s3mesh.mesh import MeshMessage
 from s3mesh.monitoring.event.forward import ForwardMessageEvent
 from s3mesh.s3 import S3Uploader
 from s3mesh.sns import SNSUploader
+
+
+@dataclass
+class MessageDestinationConfig:
+    message_destination: str
+    s3_bucket_name: Optional[str]
+    s3_endpoint_url: Optional[str]
+    sns_topic_arn: Optional[str]
 
 
 class MessageUploader(Protocol):
