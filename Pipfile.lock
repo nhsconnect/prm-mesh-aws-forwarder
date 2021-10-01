@@ -65,11 +65,11 @@
         },
         "mesh-client": {
             "hashes": [
-                "sha256:930098556a7ada5d0a47b34f196288704826eb9b6c965f7adaf1c6f83dcd8f4a",
-                "sha256:b0e8f70a0c27496fba1ed66d09a5a1cab1766e5c963419211248d5cd0b7f1d58"
+                "sha256:df643f5b704cfd0f08792b71202e8f5d300f13137fc10598d4b3c25bcd9ae08d",
+                "sha256:eb5dd654d62ca6e2ddb90515808befba1ff177373385ae6e9081563fe939961a"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
-            "version": "==0.11.0"
+            "version": "==1.2.0"
         },
         "mesh-inbox-s3-forwarder": {
             "editable": true,
