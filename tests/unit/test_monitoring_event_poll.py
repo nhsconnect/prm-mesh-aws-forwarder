@@ -1,4 +1,4 @@
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from s3mesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR
 from s3mesh.monitoring.event.poll import POLL_INBOX_EVENT, PollInboxEvent

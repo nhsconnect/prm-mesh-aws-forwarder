@@ -1,4 +1,4 @@
-from mock import MagicMock
+from unittest.mock import MagicMock
 
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
 from s3mesh.monitoring.error import (
