@@ -11,7 +11,7 @@ moto = {version = "~=2.2", extras = ["server"]}
 pytest-cov = "~=2.12"
 pytest = "~=6.2"
 pyfakefs = "~=4.5"
-fake-mesh = "~=0.1.6"
+fake-mesh = "~=0.3"
 flake8 = "~=3.9"
 flake8-bugbear="~=21.9"
 flake8-comprehensions="~=3.6"
