@@ -367,10 +367,36 @@ def test_records_mesh_error_when_counting_messages():
     )
 
 
-def test_raises_retryable_exception_when_message_uploader_raises_uploader_error():
-    successful_message_1 = mock_mesh_message()
+def test_records_error_when_message_uploader_raises_uploader_error():
+    probe = MagicMock()
+    forward_message_event = MagicMock()
+    probe.new_forward_message_event.return_value = forward_message_event
+    message = mock_mesh_message()
+    exception = UploaderError("error_message")
+
     forwarder = build_forwarder(
-        incoming_messages=[successful_message_1], uploader_error=UploaderError("error_message")
+        uploader_error=exception,
+        incoming_messages=[message],
+        probe=probe,
+    )
+
+    with pytest.raises(RetryableException):
+        forwarder.forward_messages()
+
+    forward_message_event.assert_has_calls(
+        [
+            call.record_message_metadata(message),
+            call.record_uploader_error(exception),
+            call.finish(),
+        ],
+        any_order=False,
+    )
+
+
+def test_raises_retryable_exception_when_message_uploader_raises_uploader_error():
+    message = mock_mesh_message()
+    forwarder = build_forwarder(
+        incoming_messages=[message], uploader_error=UploaderError("error_message")
     )
 
     with pytest.raises(RetryableException):
