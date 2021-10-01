@@ -2,8 +2,7 @@ import logging
 
 from s3mesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshInbox, MissingMeshHeader
 from s3mesh.monitoring.probe import LoggingProbe
-from s3mesh.s3 import S3Uploader
-from s3mesh.uploader import UploaderError
+from s3mesh.uploader import UploaderError, MessageUploader
 
 logger = logging.getLogger(__name__)
 
@@ -13,8 +12,7 @@ class RetryableException(Exception):
 
 
 class MeshToS3Forwarder:
-    # FIXME: Should be MessageUploader instead of S3Uploader
-    def __init__(self, inbox: MeshInbox, uploader: S3Uploader, probe: LoggingProbe):
+    def __init__(self, inbox: MeshInbox, uploader: MessageUploader, probe: LoggingProbe):
         self._inbox = inbox
         self._uploader = uploader
         self._probe = probe
