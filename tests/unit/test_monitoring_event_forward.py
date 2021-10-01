@@ -5,6 +5,7 @@ from s3mesh.monitoring.error import (
     INVALID_MESH_HEADER_ERROR,
     MESH_CLIENT_NETWORK_ERROR,
     MISSING_MESH_HEADER_ERROR,
+    UPLOADER_ERROR,
 )
 from s3mesh.monitoring.event.forward import FORWARD_MESSAGE_EVENT, ForwardMessageEvent
 from tests.builders.common import a_string
@@ -111,4 +112,19 @@ def test_record_mesh_client_network_error():
 
     mock_output.log_event.assert_called_with(
         FORWARD_MESSAGE_EVENT, {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message}
+    )
+
+
+def test_record_uploader_error():
+    mock_output = MagicMock()
+    error_message = "Oh no!"
+    mock_exception = MagicMock()
+    mock_exception.error_message = error_message
+
+    forward_message_event = ForwardMessageEvent(mock_output)
+    forward_message_event.record_uploader_error(mock_exception)
+    forward_message_event.finish()
+
+    mock_output.log_event.assert_called_with(
+        FORWARD_MESSAGE_EVENT, {"error": UPLOADER_ERROR, "errorMessage": error_message}
     )

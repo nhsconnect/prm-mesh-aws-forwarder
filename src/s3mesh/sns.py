@@ -1,5 +1,5 @@
 from s3mesh.mesh import MeshMessage
-from s3mesh.monitoring.event.forward import ForwardMessageEvent
+from s3mesh.uploader import UploadEventMetadata
 
 
 class SNSUploader:
@@ -7,7 +7,7 @@ class SNSUploader:
         self._sns_client = sns_client
         self.topic_arn = topic_arn
 
-    def upload(self, message: MeshMessage, forward_message_event: ForwardMessageEvent):
+    def upload(self, message: MeshMessage, upload_event_metadata: UploadEventMetadata):
         message_content = message.read().decode("utf-8")
         response = self._sns_client.publish(TopicArn=self.topic_arn, Message=message_content)
-        forward_message_event.record_sns_message_id(response["MessageId"])
+        upload_event_metadata.record_sns_message_id(response["MessageId"])
