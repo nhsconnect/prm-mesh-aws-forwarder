@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional, Protocol
+from typing import Optional
 
 import boto3
 
-from s3mesh.mesh import MeshMessage
-from s3mesh.monitoring.event.forward import ForwardMessageEvent
 from s3mesh.s3 import S3Uploader
 from s3mesh.sns import SNSUploader
+from s3mesh.uploader import MessageUploader
 
 
 @dataclass
@@ -15,11 +14,6 @@ class MessageDestinationConfig:
     s3_bucket_name: Optional[str]
     s3_endpoint_url: Optional[str]
     sns_topic_arn: Optional[str]
-
-
-class MessageUploader(Protocol):
-    def upload(self, message: MeshMessage, forward_message_event: ForwardMessageEvent):
-        ...
 
 
 class UnknownMessageDestination(Exception):

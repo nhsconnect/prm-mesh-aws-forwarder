@@ -3,6 +3,7 @@ import logging
 from s3mesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshInbox, MissingMeshHeader
 from s3mesh.monitoring.probe import LoggingProbe
 from s3mesh.s3 import S3Uploader
+from s3mesh.uploader import UploaderError
 
 logger = logging.getLogger(__name__)
 
@@ -12,6 +13,7 @@ class RetryableException(Exception):
 
 
 class MeshToS3Forwarder:
+    # FIXME: Should be MessageUploader instead of S3Uploader
     def __init__(self, inbox: MeshInbox, uploader: S3Uploader, probe: LoggingProbe):
         self._inbox = inbox
         self._uploader = uploader
@@ -45,6 +47,7 @@ class MeshToS3Forwarder:
         finally:
             poll_inbox_event.finish()
 
+    # flake8: noqa: C901
     def _process_message(self, message):
         forward_message_event = self._probe.new_forward_message_event()
         try:
@@ -56,6 +59,8 @@ class MeshToS3Forwarder:
             forward_message_event.record_missing_mesh_header(e)
         except InvalidMeshHeader as e:
             forward_message_event.record_invalid_mesh_header(e)
+        except UploaderError:
+            raise RetryableException()
         except MeshClientNetworkError as e:
             forward_message_event.record_mesh_client_network_error(e)
             raise RetryableException()

@@ -4,6 +4,7 @@ import pytest
 
 from s3mesh.forwarder import RetryableException
 from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
+from s3mesh.uploader import UploaderError
 from tests.builders.common import a_string
 from tests.builders.forwarder import build_forwarder
 from tests.builders.mesh import mesh_client_error, mock_mesh_message
@@ -43,7 +44,7 @@ def test_forwards_message():
     probe.new_forward_message_event.return_value = forward_message_event
 
     forwarder = build_forwarder(
-        incoming_messages=[mock_message], s3_uploader=mock_uploader, probe=probe
+        incoming_messages=[mock_message], uploader=mock_uploader, probe=probe
     )
 
     forwarder.forward_messages()
@@ -73,7 +74,7 @@ def test_forwards_multiple_messages():
 
     forwarder = build_forwarder(
         incoming_messages=[mock_message_one, mock_message_two],
-        s3_uploader=mock_uploader,
+        uploader=mock_uploader,
         probe=probe,
     )
 
@@ -122,7 +123,7 @@ def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header()
 
     forwarder = build_forwarder(
         incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
-        s3_uploader=mock_uploader,
+        uploader=mock_uploader,
         probe=probe,
     )
 
@@ -159,7 +160,7 @@ def test_continues_uploading_messages_when_one_of_them_has_missing_mesh_header()
 
     forwarder = build_forwarder(
         incoming_messages=[successful_message_1, unsuccessful_message, successful_message_2],
-        s3_uploader=mock_uploader,
+        uploader=mock_uploader,
         probe=probe,
     )
 
@@ -364,3 +365,13 @@ def test_records_mesh_error_when_counting_messages():
             call.new_count_messages_event().finish(),
         ]
     )
+
+
+def test_raises_retryable_exception_when_message_uploader_raises_uploader_error():
+    successful_message_1 = mock_mesh_message()
+    forwarder = build_forwarder(
+        incoming_messages=[successful_message_1], uploader_error=UploaderError("error_message")
+    )
+
+    with pytest.raises(RetryableException):
+        forwarder.forward_messages()
