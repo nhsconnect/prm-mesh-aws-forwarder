@@ -99,7 +99,7 @@ class E2ETestContext:
             "MESH_CA_CERT_SSM_PARAM_NAME": f"{test_name}/{MESH_CA_CERT_SSM_PARAM}",
             "POLL_FREQUENCY": "5",
             "FORWARDER_HOME": self._forwarder_home,
-            "S3_ENDPOINT_URL": self._aws_endpoint,
+            "ENDPOINT_URL": self._aws_endpoint,
             "SSM_ENDPOINT_URL": self._aws_endpoint,
         }
 

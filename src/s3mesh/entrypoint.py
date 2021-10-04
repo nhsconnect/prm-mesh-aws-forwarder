@@ -42,7 +42,7 @@ def build_message_destination_config(config) -> MessageDestinationConfig:
     return MessageDestinationConfig(
         message_destination=config.message_destination,
         s3_bucket_name=config.s3_bucket_name,
-        s3_endpoint_url=config.s3_endpoint_url,
+        endpoint_url=config.endpoint_url,
         sns_topic_arn=config.sns_topic_arn,
     )
 

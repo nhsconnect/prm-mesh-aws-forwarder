@@ -15,14 +15,14 @@ def test_returns_s3_uploader_when_message_destination_is_s3():
     config = MessageDestinationConfig(
         message_destination="s3",
         s3_bucket_name="s3_bucket_name",
-        s3_endpoint_url="s3_endpoint_url",
+        endpoint_url="endpoint_url",
         sns_topic_arn=None,
     )
     aws = MagicMock()
 
     uploader = resolve_message_uploader(config, aws)
 
-    aws.client.assert_called_once_with(service_name="s3", endpoint_url="s3_endpoint_url")
+    aws.client.assert_called_once_with(service_name="s3", endpoint_url="endpoint_url")
     assert isinstance(uploader, S3Uploader)
 
 
@@ -30,7 +30,7 @@ def test_returns_sns_uploader_when_message_destination_is_sns():
     config = MessageDestinationConfig(
         message_destination="sns",
         s3_bucket_name=None,
-        s3_endpoint_url="endpoint_url",
+        endpoint_url="endpoint_url",
         sns_topic_arn="some_arn",
     )
     aws = MagicMock()
@@ -45,7 +45,7 @@ def test_throws_exception_if_unknown_message_destination():
     config = MessageDestinationConfig(
         message_destination="unknown",
         s3_bucket_name=None,
-        s3_endpoint_url=None,
+        endpoint_url=None,
         sns_topic_arn="some_arn",
     )
     with pytest.raises(UnknownMessageDestination):

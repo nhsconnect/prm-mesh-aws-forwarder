@@ -31,7 +31,7 @@ class ForwarderConfig:
     message_destination: str = "s3"
     s3_bucket_name: Optional[str] = None
     sns_topic_arn: Optional[str] = None
-    s3_endpoint_url: Optional[str] = None
+    endpoint_url: Optional[str] = None
     ssm_endpoint_url: Optional[str] = None
 
     @classmethod

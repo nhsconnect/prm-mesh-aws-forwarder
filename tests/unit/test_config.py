@@ -15,7 +15,7 @@ def test_read_config_from_environment():
         "S3_BUCKET_NAME": "mesh-data-bucket",
         "POLL_FREQUENCY": "60",
         "FORWARDER_HOME": "/home/mesh-forwarder",
-        "S3_ENDPOINT_URL": "https://an.endpoint:3000",
+        "ENDPOINT_URL": "https://an.endpoint:3000",
         "SSM_ENDPOINT_URL": "https://an.endpoint:3001",
     }
 
@@ -30,7 +30,7 @@ def test_read_config_from_environment():
         s3_bucket_name="mesh-data-bucket",
         poll_frequency="60",
         forwarder_home="/home/mesh-forwarder",
-        s3_endpoint_url="https://an.endpoint:3000",
+        endpoint_url="https://an.endpoint:3000",
         ssm_endpoint_url="https://an.endpoint:3001",
     )
 
@@ -64,7 +64,7 @@ def test_read_config_from_environment_uses_default_when_no_var_set():
         s3_bucket_name="mesh-data-bucket",
         poll_frequency="60",
         forwarder_home="/home/mesh-forwarder",
-        s3_endpoint_url=None,
+        endpoint_url=None,
         ssm_endpoint_url=None,
     )
 
