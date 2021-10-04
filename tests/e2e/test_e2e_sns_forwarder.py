@@ -58,7 +58,7 @@ def test_mesh_inbox_sns_forwarder(e2e_test_context):
         Endpoint=f"{sqs_arn}:{queue_name}",
     )
 
-    file_contents = a_string()
+    message_contents = a_string()
 
     forwarder = _build_sns_forwarder(
         sns_topic_arn=topic_arn,
@@ -66,11 +66,11 @@ def test_mesh_inbox_sns_forwarder(e2e_test_context):
     )
     try:
         forwarder.start()
-        mesh.send_message(RECEIVING_MESH_MAILBOX, file_contents.encode("utf-8"))
+        mesh.send_message(RECEIVING_MESH_MAILBOX, message_contents.encode("utf-8"))
         messages = sqs.receive_message(QueueUrl=queue_url, WaitTimeSeconds=10)["Messages"]
         message_body = json.loads(messages[0]["Body"])["Message"]
 
-        assert message_body == file_contents
+        assert message_body == message_contents
     finally:
         forwarder.stop()
         e2e_test_context.unset_fake_aws_environment_vars()
