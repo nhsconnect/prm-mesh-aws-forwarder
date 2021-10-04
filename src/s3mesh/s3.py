@@ -1,5 +1,8 @@
+from botocore.exceptions import ClientError
+
 from s3mesh.mesh import MeshMessage
 from s3mesh.uploader import UploadEventMetadata
+from src.s3mesh.uploader import UploaderError
 
 
 class S3Uploader:
@@ -8,7 +11,10 @@ class S3Uploader:
         self._bucket_name = bucket_name
 
     def upload(self, message: MeshMessage, upload_event_metadata: UploadEventMetadata):
-        s3_file_name = message.file_name.replace(" ", "_")
-        key = f"{message.date_delivered.strftime('%Y/%m/%d')}/{s3_file_name}"
-        self._s3_client.upload_fileobj(message, self._bucket_name, key)
-        upload_event_metadata.record_s3_key(key)
+        try:
+            s3_file_name = message.file_name.replace(" ", "_")
+            key = f"{message.date_delivered.strftime('%Y/%m/%d')}/{s3_file_name}"
+            self._s3_client.upload_fileobj(message, self._bucket_name, key)
+            upload_event_metadata.record_s3_key(key)
+        except ClientError as e:
+            raise UploaderError(str(e))
