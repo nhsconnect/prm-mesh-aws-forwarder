@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
-from s3mesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR
-from s3mesh.monitoring.event.count import COUNT_MESSAGES_EVENT, CountMessagesEvent
+from awsmesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR
+from awsmesh.monitoring.event.count import COUNT_MESSAGES_EVENT, CountMessagesEvent
 
 
 def test_finish_calls_log_event_with_event_name():

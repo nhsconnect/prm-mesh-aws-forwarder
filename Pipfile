@@ -28,7 +28,7 @@ types-requests = "2.25"
 python_version = "3.9"
 
 [scripts]
-test = "python -m pytest --cov=s3mesh --cov-report=term-missing tests/unit tests/e2e"
+test = "python -m pytest --cov=awsmesh --cov-report=term-missing tests/unit tests/e2e"
 format-import = "isort src/ tests/ setup.py"
 format = "black -t py39 -l100 src/ tests/ setup.py"
 check-format = "black --check -t py39 -l100 src/ tests/ setup.py"

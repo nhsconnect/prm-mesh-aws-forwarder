@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
-from s3mesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR
-from s3mesh.monitoring.event.poll import POLL_INBOX_EVENT, PollInboxEvent
+from awsmesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR
+from awsmesh.monitoring.event.poll import POLL_INBOX_EVENT, PollInboxEvent
 
 
 def test_finish_calls_log_event_with_event_name():

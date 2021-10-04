@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from s3mesh.mesh import MeshClientNetworkError, MeshInbox
+from awsmesh.mesh import MeshClientNetworkError, MeshInbox
 from tests.builders.common import a_string
 from tests.builders.mesh import (
     TEST_INBOX_URL,

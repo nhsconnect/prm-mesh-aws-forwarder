@@ -1,8 +1,8 @@
 import logging
 from unittest.mock import MagicMock, call, patch
 
-from s3mesh.forwarder import RetryableException
-from s3mesh.forwarder_service import MeshToS3ForwarderService
+from awsmesh.forwarder import RetryableException
+from awsmesh.forwarder_service import MeshToS3ForwarderService
 
 
 def test_calls_forward_messages_multiple_times_until_exit_event_is_set():
@@ -29,7 +29,7 @@ def test_logs_start_and_exit_of_the_service():
         forwarder=forwarder, poll_frequency_sec=0, exit_event=exit_event
     )
 
-    logger = logging.getLogger("s3mesh.forwarder_service")
+    logger = logging.getLogger("awsmesh.forwarder_service")
     with patch.object(logger, "info") as mock_info:
         forwarder_service.start()
 
@@ -47,7 +47,7 @@ def test_sets_exit_event_and_logs_request_to_stop_when_calling_stop():
         forwarder=forwarder, poll_frequency_sec=0, exit_event=exit_event
     )
 
-    logger = logging.getLogger("s3mesh.forwarder_service")
+    logger = logging.getLogger("awsmesh.forwarder_service")
     with patch.object(logger, "info") as mock_info:
         forwarder_service.stop()
 

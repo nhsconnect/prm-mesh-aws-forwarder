@@ -1,8 +1,8 @@
 import logging
 
-from s3mesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshInbox, MissingMeshHeader
-from s3mesh.monitoring.probe import LoggingProbe
-from s3mesh.uploader import MessageUploader, UploaderError
+from awsmesh.mesh import InvalidMeshHeader, MeshClientNetworkError, MeshInbox, MissingMeshHeader
+from awsmesh.monitoring.probe import LoggingProbe
+from awsmesh.uploader import MessageUploader, UploaderError
 
 logger = logging.getLogger(__name__)
 

@@ -2,13 +2,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from s3mesh.message_destination_resolver import (
+from awsmesh.message_destination_resolver import (
     MessageDestinationConfig,
     UnknownMessageDestination,
     resolve_message_uploader,
 )
-from s3mesh.s3 import S3Uploader
-from s3mesh.sns import SNSUploader
+from awsmesh.s3 import S3Uploader
+from awsmesh.sns import SNSUploader
 
 
 def test_returns_s3_uploader_when_message_destination_is_s3():

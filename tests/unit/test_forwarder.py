@@ -2,9 +2,9 @@ from unittest.mock import MagicMock, call
 
 import pytest
 
-from s3mesh.forwarder import RetryableException
-from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
-from s3mesh.uploader import UploaderError
+from awsmesh.forwarder import RetryableException
+from awsmesh.mesh import InvalidMeshHeader, MissingMeshHeader
+from awsmesh.uploader import UploaderError
 from tests.builders.common import a_string
 from tests.builders.forwarder import build_forwarder
 from tests.builders.mesh import mesh_client_error, mock_mesh_message

@@ -1,4 +1,4 @@
-from s3mesh.monitoring.event.base import ForwarderEvent
+from awsmesh.monitoring.event.base import ForwarderEvent
 
 POLL_INBOX_EVENT = "POLL_MESSAGE"
 

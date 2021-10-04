@@ -5,10 +5,10 @@ from typing import Optional
 
 import mesh_client
 
-from s3mesh.forwarder import MeshToS3Forwarder, RetryableException
-from s3mesh.mesh import MeshInbox
-from s3mesh.message_destination_resolver import MessageDestinationConfig, resolve_message_uploader
-from s3mesh.monitoring.probe import LoggingProbe
+from awsmesh.forwarder import MeshToS3Forwarder, RetryableException
+from awsmesh.mesh import MeshInbox
+from awsmesh.message_destination_resolver import MessageDestinationConfig, resolve_message_uploader
+from awsmesh.monitoring.probe import LoggingProbe
 
 logger = logging.getLogger(__name__)
 

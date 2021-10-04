@@ -1,6 +1,6 @@
-from s3mesh.mesh import InvalidMeshHeader, MeshMessage, MissingMeshHeader
-from s3mesh.monitoring.error import INVALID_MESH_HEADER_ERROR, MISSING_MESH_HEADER_ERROR
-from s3mesh.monitoring.event.base import ForwarderEvent
+from awsmesh.mesh import InvalidMeshHeader, MeshMessage, MissingMeshHeader
+from awsmesh.monitoring.error import INVALID_MESH_HEADER_ERROR, MISSING_MESH_HEADER_ERROR
+from awsmesh.monitoring.event.base import ForwarderEvent
 
 FORWARD_MESSAGE_EVENT = "FORWARD_MESH_MESSAGE"
 

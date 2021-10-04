@@ -2,8 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from s3mesh.sns import SNSUploader
-from s3mesh.uploader import UploaderError
+from awsmesh.sns import SNSUploader
+from awsmesh.uploader import UploaderError
 from tests.builders.aws import build_client_error
 from tests.builders.common import a_string
 

@@ -3,7 +3,7 @@ from logging import makeLogRecord
 
 import pytest
 
-from s3mesh.logging import JsonFormatter
+from awsmesh.logging import JsonFormatter
 from tests.builders.common import a_string
 from tests.builders.mesh import an_epoch_timestamp
 

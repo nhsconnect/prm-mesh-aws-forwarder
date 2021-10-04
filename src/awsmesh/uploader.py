@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from s3mesh.mesh import MeshMessage
+from awsmesh.mesh import MeshMessage
 
 
 class UploaderError(Exception):

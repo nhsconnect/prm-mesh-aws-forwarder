@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from requests import ConnectionError, HTTPError, Request, Response
 
-from s3mesh.mesh import (
+from awsmesh.mesh import (
     MESH_MESSAGE_TYPE_DATA,
     MESH_STATUS_EVENT_TRANSFER,
     MESH_STATUS_SUCCESS,

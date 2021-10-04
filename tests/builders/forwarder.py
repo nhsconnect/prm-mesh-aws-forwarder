@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from s3mesh.forwarder import MeshToS3Forwarder
+from awsmesh.forwarder import MeshToS3Forwarder
 
 
 def build_forwarder(**kwargs):

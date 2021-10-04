@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from s3mesh.secrets import SsmSecretManager
+from awsmesh.secrets import SsmSecretManager
 
 
 def _read_file(file_path):

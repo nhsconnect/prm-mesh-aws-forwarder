@@ -1,13 +1,13 @@
 from unittest.mock import MagicMock
 
-from s3mesh.mesh import InvalidMeshHeader, MissingMeshHeader
-from s3mesh.monitoring.error import (
+from awsmesh.mesh import InvalidMeshHeader, MissingMeshHeader
+from awsmesh.monitoring.error import (
     INVALID_MESH_HEADER_ERROR,
     MESH_CLIENT_NETWORK_ERROR,
     MISSING_MESH_HEADER_ERROR,
     UPLOADER_ERROR,
 )
-from s3mesh.monitoring.event.forward import FORWARD_MESSAGE_EVENT, ForwardMessageEvent
+from awsmesh.monitoring.event.forward import FORWARD_MESSAGE_EVENT, ForwardMessageEvent
 from tests.builders.common import a_string
 from tests.builders.mesh import mock_mesh_message
 

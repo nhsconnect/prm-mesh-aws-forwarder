@@ -1,8 +1,8 @@
 from botocore.exceptions import ClientError
 
-from s3mesh.mesh import MeshMessage
-from s3mesh.uploader import UploadEventMetadata
-from src.s3mesh.uploader import UploaderError
+from awsmesh.mesh import MeshMessage
+from awsmesh.uploader import UploadEventMetadata
+from src.awsmesh.uploader import UploaderError
 
 
 class S3Uploader:

@@ -1,9 +1,9 @@
 from logging import Logger, getLogger
 
-from s3mesh.monitoring.event.count import CountMessagesEvent
-from s3mesh.monitoring.event.forward import ForwardMessageEvent
-from s3mesh.monitoring.event.poll import PollInboxEvent
-from s3mesh.monitoring.output import LoggingOutput
+from awsmesh.monitoring.event.count import CountMessagesEvent
+from awsmesh.monitoring.event.forward import ForwardMessageEvent
+from awsmesh.monitoring.event.poll import PollInboxEvent
+from awsmesh.monitoring.output import LoggingOutput
 
 logger = getLogger(__name__)
 

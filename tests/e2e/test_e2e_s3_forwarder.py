@@ -3,7 +3,7 @@ from datetime import datetime
 from threading import Thread
 from time import sleep
 
-from s3mesh.entrypoint import build_forwarder_from_environment_variables
+from awsmesh.entrypoint import build_forwarder_from_environment_variables
 from tests.builders.common import a_string
 
 SENDING_MESH_MAILBOX = "e2e-s3-test-mailbox-sender"

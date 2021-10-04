@@ -1,4 +1,4 @@
-from s3mesh.monitoring.event.base import ForwarderEvent
+from awsmesh.monitoring.event.base import ForwarderEvent
 
 COUNT_MESSAGES_EVENT = "COUNT_MESSAGES"
 

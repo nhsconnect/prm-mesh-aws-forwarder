@@ -3,9 +3,9 @@ from typing import Optional
 
 import boto3
 
-from s3mesh.s3 import S3Uploader
-from s3mesh.sns import SNSUploader
-from s3mesh.uploader import MessageUploader
+from awsmesh.s3 import S3Uploader
+from awsmesh.sns import SNSUploader
+from awsmesh.uploader import MessageUploader
 
 
 @dataclass

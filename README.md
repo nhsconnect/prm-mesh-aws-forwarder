@@ -1,6 +1,6 @@
 # prm-gp2gp-mesh-s3-forwarder
 
-Generic MESH to S3 forwarder, capable of reading messages from a MESH inbox and writing them to AWS S3.
+Generic AWS MESH forwarder, capable of reading messages from a MESH inbox and writing them to AWS S3 or SNS.
 
 ## Developing
 
@@ -64,7 +64,7 @@ If you see the below notice when trying to activate the python virtual environme
 
 Install with `python setup.py install`.
 
-The MESH to S3 forwarder can then be started with `python -m s3mesh.entrypoint`.
+The AWS MESH forwarder can then be started with `python -m awsmesh.entrypoint`.
 
 Running the forwarder requires the following environment variables to be set:
 

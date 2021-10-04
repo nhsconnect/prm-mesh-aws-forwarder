@@ -1,6 +1,6 @@
 from unittest import mock
 
-from s3mesh.config import ForwarderConfig
+from awsmesh.config import ForwarderConfig
 
 
 def test_read_config_from_environment():

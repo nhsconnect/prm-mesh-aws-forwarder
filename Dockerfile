@@ -13,4 +13,4 @@ RUN chown -R mesh:mesh /mesh-forwarder
 
 USER mesh
 
-ENTRYPOINT ["python", "-m", "s3mesh.entrypoint"]
+ENTRYPOINT ["python", "-m", "awsmesh.entrypoint"]

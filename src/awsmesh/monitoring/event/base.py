@@ -1,6 +1,6 @@
-from s3mesh.mesh import MeshClientNetworkError
-from s3mesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR, UPLOADER_ERROR
-from s3mesh.uploader import UploaderError
+from awsmesh.mesh import MeshClientNetworkError
+from awsmesh.monitoring.error import MESH_CLIENT_NETWORK_ERROR, UPLOADER_ERROR
+from awsmesh.uploader import UploaderError
 
 
 class ForwarderEvent:

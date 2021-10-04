@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from s3mesh.monitoring.output import LoggingOutput
+from awsmesh.monitoring.output import LoggingOutput
 
 
 def test_log_event_calls_logger_info_with_event_name_and_fields():
