@@ -77,6 +77,8 @@ Running the forwarder requires the following environment variables to be set:
 | MESH_CLIENT_CERT_SSM_PARAM_NAME | Name of AWS SSM parameter store entry containing the client certificate                                 |
 | MESH_CLIENT_KEY_SSM_PARAM_NAME  | Name of AWS SSM parameter store entry containing the client certificate key                             |
 | MESH_CA_CERT_SSM_PARAM_NAME     | Name of AWS SSM parameter store entry containing the certificate authority chain                        |
-| S3_BUCKET_NAME                  | S3 bucket to publish messages to                                                                        |
+| MESSAGE_DESTINATION             | Service messages are published to (s3 or sns)                                                           |
+| S3_BUCKET_NAME                  | S3 bucket to publish messages to (defined if MESSAGE_DESTINATION="s3")                                  |
+| SNS_TOPIC_ARN                   | SNS topic to publish messages to (defined if MESSAGE_DESTINATION="sns")                                 |
 | POLL_FREQUENCY                  | Duration in seconds between each poll of the mesh mailbox                                               |
-| FORWARDER_HOME                  | Directory used to store certificates extracted from parameter store                                      |
+| FORWARDER_HOME                  | Directory used to store certificates extracted from parameter store                                     |
