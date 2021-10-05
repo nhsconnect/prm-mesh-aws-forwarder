@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from awsmesh.s3 import S3Uploader
-from src.awsmesh.uploader import UploaderError
+from awsmesh.uploader import UploaderError
 from tests.builders.aws import build_client_error
 
 
