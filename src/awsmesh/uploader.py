@@ -4,8 +4,7 @@ from awsmesh.mesh import MeshMessage
 
 
 class UploaderError(Exception):
-    def __init__(self, message):
-        self.error_message = message
+    pass
 
 
 class UploadEventMetadata(Protocol):

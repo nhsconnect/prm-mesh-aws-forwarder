@@ -36,7 +36,7 @@ def test_raises_network_error_when_iterating_all_messages_raises_an_http_error()
     with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.read_messages()
 
-    assert e.value.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+    assert str(e.value) == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
 
 
 def test_raises_network_error_when_iterating_all_messages_raises_a_connection_error():
@@ -52,7 +52,7 @@ def test_raises_network_error_when_iterating_all_messages_raises_a_connection_er
     with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.read_messages()
 
-    assert e.value.error_message == (
+    assert str(e.value) == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
         " caused by: an error"
     )
@@ -64,7 +64,7 @@ def test_raises_network_error_when_counting_messages_raises_an_http_error():
     with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.count_messages()
 
-    assert e.value.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+    assert str(e.value) == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
 
 
 def test_raises_network_error_when_counting_messages_raises_a_connection_error():
@@ -73,7 +73,7 @@ def test_raises_network_error_when_counting_messages_raises_a_connection_error()
     with pytest.raises(MeshClientNetworkError) as e:
         mesh_inbox.count_messages()
 
-    assert e.value.error_message == (
+    assert str(e.value) == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
         " caused by: an error"
     )

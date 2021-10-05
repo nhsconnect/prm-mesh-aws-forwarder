@@ -299,7 +299,7 @@ def test_mesh_network_error_raised_when_ack_raises_http_error():
     with pytest.raises(MeshClientNetworkError) as e:
         message.acknowledge()
 
-    assert e.value.error_message == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+    assert str(e.value) == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
 
 
 def test_mesh_network_error_raised_when_ack_raises_connection_error():
@@ -310,7 +310,7 @@ def test_mesh_network_error_raised_when_ack_raises_connection_error():
     with pytest.raises(MeshClientNetworkError) as e:
         message.acknowledge()
 
-    assert e.value.error_message == (
+    assert str(e.value) == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
         " caused by: an error"
     )

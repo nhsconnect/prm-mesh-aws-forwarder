@@ -72,4 +72,4 @@ def test_upload_error_raised_when_upload_raises_exception():
     with pytest.raises(UploaderError) as e:
         uploader.upload(mesh_message, MagicMock())
 
-    assert error_message in e.value.error_message
+    assert error_message in str(e.value)

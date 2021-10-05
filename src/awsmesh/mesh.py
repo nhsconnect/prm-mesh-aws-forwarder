@@ -89,8 +89,7 @@ class MeshInbox:
 
 
 class MeshClientNetworkError(Exception):
-    def __init__(self, message):
-        self.error_message = message
+    pass
 
 
 class InvalidMeshHeader(Exception):
