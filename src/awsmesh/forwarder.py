@@ -59,7 +59,6 @@ class MeshToS3Forwarder:
             forward_message_event.record_invalid_mesh_header(e)
         except UploaderError as e:
             forward_message_event.record_uploader_error(e)
-            raise RetryableException()
         except MeshClientNetworkError as e:
             forward_message_event.record_mesh_client_network_error(e)
             raise RetryableException()

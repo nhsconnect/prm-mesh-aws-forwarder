@@ -380,8 +380,7 @@ def test_records_error_when_message_uploader_raises_uploader_error():
         probe=probe,
     )
 
-    with pytest.raises(RetryableException):
-        forwarder.forward_messages()
+    forwarder.forward_messages()
 
     forward_message_event.assert_has_calls(
         [
@@ -391,13 +390,3 @@ def test_records_error_when_message_uploader_raises_uploader_error():
         ],
         any_order=False,
     )
-
-
-def test_raises_retryable_exception_when_message_uploader_raises_uploader_error():
-    message = mock_mesh_message()
-    forwarder = build_forwarder(
-        incoming_messages=[message], uploader_error=UploaderError("error_message")
-    )
-
-    with pytest.raises(RetryableException):
-        forwarder.forward_messages()
