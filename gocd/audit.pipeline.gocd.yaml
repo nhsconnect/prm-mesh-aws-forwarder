@@ -1,7 +1,7 @@
 format_version: 4
 pipelines:
   "prm-mesh-aws-forwarder.audit":
-    group: gp2gp-audit
+    group: shared-components-audit
     label_template: "${git[:8]}"
     materials:
       git:
