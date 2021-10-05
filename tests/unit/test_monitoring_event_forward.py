@@ -8,6 +8,7 @@ from awsmesh.monitoring.error import (
     UPLOADER_ERROR,
 )
 from awsmesh.monitoring.event.forward import FORWARD_MESSAGE_EVENT, ForwardMessageEvent
+from awsmesh.uploader import UploaderError
 from tests.builders.common import a_string
 from tests.builders.mesh import mock_mesh_message
 
@@ -103,11 +104,10 @@ def test_record_invalid_mesh_header():
 def test_record_mesh_client_network_error():
     mock_output = MagicMock()
     error_message = "Oh no!"
-    mock_exception = MagicMock()
-    mock_exception.error_message = error_message
+    uploader_error = UploaderError(error_message)
 
     forward_message_event = ForwardMessageEvent(mock_output)
-    forward_message_event.record_mesh_client_network_error(mock_exception)
+    forward_message_event.record_mesh_client_network_error(uploader_error)
     forward_message_event.finish()
 
     mock_output.log_event.assert_called_with(
@@ -118,11 +118,10 @@ def test_record_mesh_client_network_error():
 def test_record_uploader_error():
     mock_output = MagicMock()
     error_message = "Oh no!"
-    mock_exception = MagicMock()
-    mock_exception.error_message = error_message
+    uploader_error = UploaderError(error_message)
 
     forward_message_event = ForwardMessageEvent(mock_output)
-    forward_message_event.record_uploader_error(mock_exception)
+    forward_message_event.record_uploader_error(uploader_error)
     forward_message_event.finish()
 
     mock_output.log_event.assert_called_with(
