@@ -1,6 +1,6 @@
 format_version: 4
 pipelines:
-  "prm-gp2gp-mesh-s3-forwarder":
+  "prm-mesh-aws-forwarder":
     group: gp2gp
     label_template: "${git[:8]}"
     materials:
