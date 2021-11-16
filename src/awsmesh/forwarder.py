@@ -11,7 +11,7 @@ class RetryableException(Exception):
     pass
 
 
-class MeshToS3Forwarder:
+class MeshToAwsForwarder:
     def __init__(self, inbox: MeshInbox, uploader: MessageUploader, probe: LoggingProbe):
         self._inbox = inbox
         self._uploader = uploader

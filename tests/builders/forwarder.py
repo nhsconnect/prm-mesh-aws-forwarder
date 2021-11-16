@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from awsmesh.forwarder import MeshToS3Forwarder
+from awsmesh.forwarder import MeshToAwsForwarder
 
 
 def build_forwarder(**kwargs):
@@ -13,4 +13,4 @@ def build_forwarder(**kwargs):
     mock_mesh_inbox.count_messages.side_effect = kwargs.get("count_error", None)
     mock_mesh_inbox.count_messages.return_value = kwargs.get("inbox_message_count", 0)
 
-    return MeshToS3Forwarder(mock_mesh_inbox, mock_uploader, mock_probe)
+    return MeshToAwsForwarder(mock_mesh_inbox, mock_uploader, mock_probe)

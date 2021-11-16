@@ -5,7 +5,7 @@ from typing import Optional
 
 import mesh_client
 
-from awsmesh.forwarder import MeshToS3Forwarder, RetryableException
+from awsmesh.forwarder import MeshToAwsForwarder, RetryableException
 from awsmesh.mesh import MeshInbox
 from awsmesh.message_destination_resolver import MessageDestinationConfig, resolve_message_uploader
 from awsmesh.monitoring.probe import LoggingProbe
@@ -24,10 +24,10 @@ class MeshConfig:
     ca_cert_path: str
 
 
-class MeshToS3ForwarderService:
+class MeshToAwsForwarderService:
     def __init__(
         self,
-        forwarder: MeshToS3Forwarder,
+        forwarder: MeshToAwsForwarder,
         poll_frequency_sec: int,
         exit_event: Optional[Event] = None,
     ):
@@ -56,7 +56,7 @@ def build_forwarder_service(
     mesh_config: MeshConfig,
     message_destination_config: MessageDestinationConfig,
     poll_frequency_sec,
-) -> MeshToS3ForwarderService:
+) -> MeshToAwsForwarderService:
     uploader = resolve_message_uploader(message_destination_config)
 
     mesh = mesh_client.MeshClient(
@@ -68,5 +68,5 @@ def build_forwarder_service(
         verify=mesh_config.ca_cert_path,
     )
     inbox = MeshInbox(mesh)
-    forwarder = MeshToS3Forwarder(inbox, uploader, LoggingProbe())
-    return MeshToS3ForwarderService(forwarder, poll_frequency_sec)
+    forwarder = MeshToAwsForwarder(inbox, uploader, LoggingProbe())
+    return MeshToAwsForwarderService(forwarder, poll_frequency_sec)

@@ -2,7 +2,7 @@ import logging
 from unittest.mock import MagicMock, call, patch
 
 from awsmesh.forwarder import RetryableException
-from awsmesh.forwarder_service import MeshToS3ForwarderService
+from awsmesh.forwarder_service import MeshToAwsForwarderService
 
 
 def test_calls_forward_messages_multiple_times_until_exit_event_is_set():
@@ -11,7 +11,7 @@ def test_calls_forward_messages_multiple_times_until_exit_event_is_set():
     exit_event = MagicMock()
     exit_event.is_set.side_effect = [False, False, False, True]
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=0, exit_event=exit_event
     )
     forwarder_service.start()
@@ -25,7 +25,7 @@ def test_logs_start_and_exit_of_the_service():
     exit_event = MagicMock()
     exit_event.is_set.return_value = True
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=0, exit_event=exit_event
     )
 
@@ -43,7 +43,7 @@ def test_sets_exit_event_and_logs_request_to_stop_when_calling_stop():
     forwarder = MagicMock()
     exit_event = MagicMock()
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=0, exit_event=exit_event
     )
 
@@ -61,7 +61,7 @@ def test_waits_when_mailbox_is_empty():
     exit_event = MagicMock()
     exit_event.is_set.side_effect = [False, True]
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=60, exit_event=exit_event
     )
     forwarder_service.start()
@@ -75,7 +75,7 @@ def test_does_not_wait_when_mailbox_is_not_empty():
     exit_event = MagicMock()
     exit_event.is_set.side_effect = [False, True]
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=60, exit_event=exit_event
     )
     forwarder_service.start()
@@ -90,7 +90,7 @@ def test_waits_when_forward_messages_raises_retryable_exception():
     exit_event = MagicMock()
     exit_event.is_set.side_effect = [False, True]
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=60, exit_event=exit_event
     )
     forwarder_service.start()
@@ -104,7 +104,7 @@ def test_waits_when_is_mailbox_empty_raises_retryable_exception():
     exit_event = MagicMock()
     exit_event.is_set.side_effect = [False, True]
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=60, exit_event=exit_event
     )
     forwarder_service.start()
@@ -118,7 +118,7 @@ def test_keeps_iterating_after_retryable_exception_was_caught():
     exit_event = MagicMock()
     exit_event.is_set.side_effect = [False, False, True]
 
-    forwarder_service = MeshToS3ForwarderService(
+    forwarder_service = MeshToAwsForwarderService(
         forwarder=forwarder, poll_frequency_sec=0, exit_event=exit_event
     )
 

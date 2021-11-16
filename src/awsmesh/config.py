@@ -1,19 +1,32 @@
 import logging
 import sys
-from dataclasses import MISSING, dataclass, fields
+from dataclasses import MISSING, Field, dataclass, fields
 from typing import Optional
+from distutils.util import strtobool
 
 logger = logging.getLogger(__name__)
 
 
-def _read_env(field, env_vars):
-    env_var = field.name.upper()
-    if env_var in env_vars:
-        return env_vars[env_var]
+def _parse_field_from_env_var(name: str, value: str, field: Field):
+    if field.type == Optional[bool]:
+        try:
+            return strtobool(value)
+        except ValueError:
+            logger.warning(
+                f"Invalid value '{value}' for {name}, ignoring and using default: {field.default}"
+            )
+            return field.default
+    return value
+
+
+def _read_env(field: Field, env_vars):
+    env_var_name = field.name.upper()
+    if env_var_name in env_vars:
+        return _parse_field_from_env_var(env_var_name, env_vars[env_var_name], field)
     elif field.default != MISSING:
         return field.default
     else:
-        logger.error(f"Expected environment variable {env_var} was not set, exiting...")
+        logger.error(f"Expected environment variable {env_var_name} was not set, exiting...")
         sys.exit(1)
 
 
@@ -33,6 +46,7 @@ class ForwarderConfig:
     sns_topic_arn: Optional[str] = None
     endpoint_url: Optional[str] = None
     ssm_endpoint_url: Optional[str] = None
+    disable_message_header_validation: Optional[bool] = False
 
     @classmethod
     def from_environment_variables(cls, env_vars):
