@@ -12,10 +12,17 @@ class RetryableException(Exception):
 
 
 class MeshToAwsForwarder:
-    def __init__(self, inbox: MeshInbox, uploader: MessageUploader, probe: LoggingProbe):
+    def __init__(
+        self,
+        inbox: MeshInbox,
+        uploader: MessageUploader,
+        probe: LoggingProbe,
+        disable_message_header_validation,
+    ):
         self._inbox = inbox
         self._uploader = uploader
         self._probe = probe
+        self._disable_message_header_validation = disable_message_header_validation
 
     def forward_messages(self):
         for message in self._poll_messages():
@@ -50,7 +57,8 @@ class MeshToAwsForwarder:
         forward_message_event = self._probe.new_forward_message_event()
         try:
             forward_message_event.record_message_metadata(message)
-            message.validate()
+            if not self._disable_message_header_validation:
+                message.validate()
             self._uploader.upload(message, forward_message_event)
             message.acknowledge()
         except MissingMeshHeader as e:

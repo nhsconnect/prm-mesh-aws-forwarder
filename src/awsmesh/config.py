@@ -1,8 +1,8 @@
 import logging
 import sys
 from dataclasses import MISSING, Field, dataclass, fields
-from typing import Optional
 from distutils.util import strtobool
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 

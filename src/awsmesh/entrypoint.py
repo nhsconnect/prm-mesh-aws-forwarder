@@ -55,6 +55,7 @@ def build_forwarder_from_environment_variables(env_vars=environ):
         mesh_config=build_mesh_config_from_ssm(ssm, config),
         message_destination_config=build_message_destination_config(config),
         poll_frequency_sec=int(config.poll_frequency),
+        disable_message_header_validation=config.disable_message_header_validation,
     )
 
 

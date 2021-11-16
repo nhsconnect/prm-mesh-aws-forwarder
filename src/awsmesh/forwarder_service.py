@@ -55,7 +55,8 @@ class MeshToAwsForwarderService:
 def build_forwarder_service(
     mesh_config: MeshConfig,
     message_destination_config: MessageDestinationConfig,
-    poll_frequency_sec,
+    poll_frequency_sec: int,
+    disable_message_header_validation: bool,
 ) -> MeshToAwsForwarderService:
     uploader = resolve_message_uploader(message_destination_config)
 
@@ -68,5 +69,5 @@ def build_forwarder_service(
         verify=mesh_config.ca_cert_path,
     )
     inbox = MeshInbox(mesh)
-    forwarder = MeshToAwsForwarder(inbox, uploader, LoggingProbe())
+    forwarder = MeshToAwsForwarder(inbox, uploader, LoggingProbe(), False)
     return MeshToAwsForwarderService(forwarder, poll_frequency_sec)

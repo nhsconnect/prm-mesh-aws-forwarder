@@ -1,3 +1,4 @@
+from unittest import mock
 from unittest.mock import MagicMock, call
 
 import pytest
@@ -110,6 +111,27 @@ def test_catches_invalid_header_error():
         forwarder.forward_messages()
     except InvalidMeshHeader:
         pytest.fail("InvalidMeshHeader was raised when it shouldn't have been")
+
+
+def test_uploads_message_with_unexpected_mesh_header_if_validation_is_disabled():
+    message_with_unexpected_header = mock_mesh_message(
+        validation_error=_an_invalid_header_exception()
+    )
+    mock_uploader = MagicMock()
+
+    forwarder = build_forwarder(
+        incoming_messages=[message_with_unexpected_header],
+        uploader=mock_uploader,
+        disable_message_header_validation=True,
+    )
+
+    forwarder.forward_messages()
+
+    mock_uploader.upload.assert_has_calls(
+        [
+            call(message_with_unexpected_header, mock.ANY),
+        ]
+    )
 
 
 def test_continues_uploading_messages_when_one_of_them_has_invalid_mesh_header():
