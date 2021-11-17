@@ -8,7 +8,7 @@ from tests.builders.aws import build_client_error
 from tests.builders.common import a_string
 
 
-def test_upload():
+def test_upload_publishes_to_sns():
     mock_sns_client = MagicMock()
     topic_arn = "test_topic"
     mesh_message = MagicMock()
@@ -33,6 +33,21 @@ def test_upload_records_message_id():
     uploader.upload(mesh_message, forward_message_event)
 
     forward_message_event.record_sns_message_id.assert_called_once_with(message_id)
+
+
+def test_upload_records_error_when_invalid_parameter_exception_raised():
+    mock_sns_client = MagicMock()
+    forward_message_event = MagicMock()
+    mesh_message = MagicMock()
+
+    mock_sns_client.publish.side_effect = build_client_error(
+        code="InvalidParameter", message="boom"
+    )
+
+    uploader = SNSUploader(mock_sns_client, "some_topic_arn")
+    uploader.upload(mesh_message, forward_message_event)
+
+    forward_message_event.record_invalid_parameter_error.assert_called_once_with("boom")
 
 
 def test_upload_error_raised_when_upload_raises_exception():

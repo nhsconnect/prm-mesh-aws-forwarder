@@ -14,5 +14,10 @@ class SNSUploader:
             message_content = message.read().decode("utf-8")
             response = self._sns_client.publish(TopicArn=self.topic_arn, Message=message_content)
             upload_event_metadata.record_sns_message_id(response["MessageId"])
-        except ClientError as e:
-            raise UploaderError(str(e))
+        except ClientError as error:
+            if error.response["Error"]["Code"] == "InvalidParameter":
+                upload_event_metadata.record_invalid_parameter_error(
+                    error.response["Error"]["Message"]
+                )
+            else:
+                raise UploaderError(str(error))
