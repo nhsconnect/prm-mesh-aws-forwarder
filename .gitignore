@@ -1,6 +1,7 @@
 .DS_Store
 .idea/
 .vscode/
+.devcontainer/
 
 build/
 dist/
@@ -12,3 +13,6 @@ mesh_inbox_s3_forwarder.egg-info
 .tox
 .coverage
 audit-output.txt
+htmlcov/
+samples/
+
