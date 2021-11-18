@@ -5,6 +5,7 @@ from awsmesh.monitoring.error import (
     INVALID_MESH_HEADER_ERROR,
     MESH_CLIENT_NETWORK_ERROR,
     MISSING_MESH_HEADER_ERROR,
+    SNS_INVALID_PARAMETER_ERROR,
     UPLOADER_ERROR,
 )
 from awsmesh.monitoring.event.forward import FORWARD_MESSAGE_EVENT, ForwardMessageEvent
@@ -61,6 +62,19 @@ def test_record_sns_message_id():
     forward_message_event.finish()
 
     mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"snsMessageId": message_id})
+
+
+def test_record_invalid_parameter_error():
+    mock_output = MagicMock()
+    error_message = "test message"
+
+    forward_message_event = ForwardMessageEvent(mock_output)
+    forward_message_event.record_invalid_parameter_error(error_message)
+    forward_message_event.finish()
+
+    mock_output.log_event.assert_called_with(
+        FORWARD_MESSAGE_EVENT, {"error": SNS_INVALID_PARAMETER_ERROR, "errorMessage": error_message}
+    )
 
 
 def test_record_missing_mesh_header():
