@@ -12,7 +12,16 @@ class SNSUploader:
     def upload(self, message: MeshMessage, upload_event_metadata: UploadEventMetadata):
         try:
             message_content = message.read().decode("utf-8")
-            response = self._sns_client.publish(TopicArn=self.topic_arn, Message=message_content)
+            message_headers = message.headers
+
+            sns_attributes = {
+                key: {"DataType": "String", "StringValue": value}
+                for key, value in message_headers.items()
+            }
+
+            response = self._sns_client.publish(
+                TopicArn=self.topic_arn, Message=message_content, MessageAttributes=sns_attributes
+            )
             upload_event_metadata.record_sns_message_id(response["MessageId"])
         except ClientError as error:
             if error.response["Error"]["Code"] == "InvalidParameter":

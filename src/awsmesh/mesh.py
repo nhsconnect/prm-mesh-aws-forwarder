@@ -54,6 +54,10 @@ class MeshMessage:
         return self._read_header("from")
 
     @property
+    def headers(self) -> dict:
+        return {}
+
+    @property
     def recipient(self) -> str:
         return self._read_header("to")
 
