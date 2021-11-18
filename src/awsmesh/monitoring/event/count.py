@@ -1,9 +1,9 @@
-from awsmesh.monitoring.event.base import ForwarderEvent
+from awsmesh.monitoring.event.base import BaseForwarderEvent
 
 COUNT_MESSAGES_EVENT = "COUNT_MESSAGES"
 
 
-class CountMessagesEvent(ForwarderEvent):
+class CountMessagesEvent(BaseForwarderEvent):
     def __init__(self, output):
         super().__init__(output, COUNT_MESSAGES_EVENT)
 

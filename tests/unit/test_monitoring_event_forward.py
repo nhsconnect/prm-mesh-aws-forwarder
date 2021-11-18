@@ -20,7 +20,7 @@ def test_finish_calls_log_event_with_event_name():
     forward_message_event = ForwardMessageEvent(mock_output)
     forward_message_event.finish()
 
-    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {})
+    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {}, "info")
 
 
 def test_record_message_metadata():
@@ -39,6 +39,7 @@ def test_record_message_metadata():
             "recipient": message.recipient,
             "fileName": message.file_name,
         },
+        "info",
     )
 
 
@@ -50,7 +51,7 @@ def test_record_s3_key():
     forward_message_event.record_s3_key(key)
     forward_message_event.finish()
 
-    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"s3Key": key})
+    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"s3Key": key}, "info")
 
 
 def test_record_sns_message_id():
@@ -61,10 +62,12 @@ def test_record_sns_message_id():
     forward_message_event.record_sns_message_id(message_id)
     forward_message_event.finish()
 
-    mock_output.log_event.assert_called_with(FORWARD_MESSAGE_EVENT, {"snsMessageId": message_id})
+    mock_output.log_event.assert_called_with(
+        FORWARD_MESSAGE_EVENT, {"snsMessageId": message_id}, "info"
+    )
 
 
-def test_record_invalid_parameter_error():
+def test_record_sns_invalid_parameter_error():
     mock_output = MagicMock()
     error_message = "test message"
 
@@ -73,7 +76,9 @@ def test_record_invalid_parameter_error():
     forward_message_event.finish()
 
     mock_output.log_event.assert_called_with(
-        FORWARD_MESSAGE_EVENT, {"error": SNS_INVALID_PARAMETER_ERROR, "errorMessage": error_message}
+        FORWARD_MESSAGE_EVENT,
+        {"error": SNS_INVALID_PARAMETER_ERROR, "errorMessage": error_message},
+        "error",
     )
 
 
@@ -91,6 +96,7 @@ def test_record_missing_mesh_header():
             "error": MISSING_MESH_HEADER_ERROR,
             "missingHeaderName": missing_header_exception.header_name,
         },
+        "info",
     )
 
 
@@ -112,6 +118,7 @@ def test_record_invalid_mesh_header():
             "expectedHeaderValue": invalid_header_exception.expected_header_value,
             "receivedHeaderValue": invalid_header_exception.header_value,
         },
+        "info",
     )
 
 
@@ -125,7 +132,9 @@ def test_record_mesh_client_network_error():
     forward_message_event.finish()
 
     mock_output.log_event.assert_called_with(
-        FORWARD_MESSAGE_EVENT, {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message}
+        FORWARD_MESSAGE_EVENT,
+        {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message},
+        "info",
     )
 
 
@@ -139,5 +148,5 @@ def test_record_uploader_error():
     forward_message_event.finish()
 
     mock_output.log_event.assert_called_with(
-        FORWARD_MESSAGE_EVENT, {"error": UPLOADER_ERROR, "errorMessage": error_message}
+        FORWARD_MESSAGE_EVENT, {"error": UPLOADER_ERROR, "errorMessage": error_message}, "info"
     )

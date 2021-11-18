@@ -11,7 +11,7 @@ def test_finish_calls_log_event_with_event_name():
     poll_inbox_event = PollInboxEvent(mock_output)
     poll_inbox_event.finish()
 
-    mock_output.log_event.assert_called_with(POLL_INBOX_EVENT, {})
+    mock_output.log_event.assert_called_with(POLL_INBOX_EVENT, {}, "info")
 
 
 def test_record_message_batch_count():
@@ -21,7 +21,7 @@ def test_record_message_batch_count():
     poll_inbox_event.record_message_batch_count(2)
     poll_inbox_event.finish()
 
-    mock_output.log_event.assert_called_with(POLL_INBOX_EVENT, {"batchMessageCount": 2})
+    mock_output.log_event.assert_called_with(POLL_INBOX_EVENT, {"batchMessageCount": 2}, "info")
 
 
 def test_record_mesh_client_network_error():
@@ -34,5 +34,7 @@ def test_record_mesh_client_network_error():
     poll_inbox_event.finish()
 
     mock_output.log_event.assert_called_with(
-        POLL_INBOX_EVENT, {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message}
+        POLL_INBOX_EVENT,
+        {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message},
+        "info",
     )

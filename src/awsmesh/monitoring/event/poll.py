@@ -1,9 +1,9 @@
-from awsmesh.monitoring.event.base import ForwarderEvent
+from awsmesh.monitoring.event.base import BaseForwarderEvent
 
 POLL_INBOX_EVENT = "POLL_MESSAGE"
 
 
-class PollInboxEvent(ForwarderEvent):
+class PollInboxEvent(BaseForwarderEvent):
     def __init__(self, output):
         super().__init__(output, POLL_INBOX_EVENT)
 

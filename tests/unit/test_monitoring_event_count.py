@@ -11,7 +11,7 @@ def test_finish_calls_log_event_with_event_name():
     count_messages_event = CountMessagesEvent(mock_output)
     count_messages_event.finish()
 
-    mock_output.log_event.assert_called_with(COUNT_MESSAGES_EVENT, {})
+    mock_output.log_event.assert_called_with(COUNT_MESSAGES_EVENT, {}, "info")
 
 
 def test_record_message_count():
@@ -23,7 +23,7 @@ def test_record_message_count():
     count_messages_event.finish()
 
     mock_output.log_event.assert_called_with(
-        COUNT_MESSAGES_EVENT, {"inboxMessageCount": message_count}
+        COUNT_MESSAGES_EVENT, {"inboxMessageCount": message_count}, "info"
     )
 
 
@@ -37,5 +37,7 @@ def test_record_mesh_client_network_error():
     count_messages_event.finish()
 
     mock_output.log_event.assert_called_with(
-        COUNT_MESSAGES_EVENT, {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message}
+        COUNT_MESSAGES_EVENT,
+        {"error": MESH_CLIENT_NETWORK_ERROR, "errorMessage": error_message},
+        "info",
     )
