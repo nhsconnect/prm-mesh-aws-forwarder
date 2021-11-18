@@ -19,6 +19,8 @@ pipelines:
                 - build:
                     source: audit-output.txt
                     destination: reports
+              tabs:
+                dependency: reports/audit-output.txt
               tasks:
                 - exec:
                     command: /bin/bash
