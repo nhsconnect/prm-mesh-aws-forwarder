@@ -54,6 +54,7 @@ def mock_client_message(**kwargs):
     message.id.return_value = kwargs.get("message_id", a_string())
     message.acknowledge.side_effect = kwargs.get("acknowledge_error", None)
     message.mex_header = lambda key: mex_headers[key]
+    message.mex_headers.return_value = mex_headers.items()
     return message
 
 

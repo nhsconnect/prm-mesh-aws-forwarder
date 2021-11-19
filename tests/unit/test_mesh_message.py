@@ -89,6 +89,14 @@ def test_exposes_recipient():
     assert message.recipient == recipient
 
 
+def test_exposes_headers():
+    headers = {"foo": "bar"}
+    client_message = mock_client_message(mex_headers=headers)
+    message = MeshMessage(client_message)
+
+    assert message.headers == headers
+
+
 def test_throws_exception_when_status_event_header_is_not_transfer():
     client_message = mock_client_message(mex_headers=build_mex_headers(status_event="COLLECT"))
 
