@@ -55,7 +55,7 @@ class MeshMessage:
 
     @property
     def headers(self) -> dict:
-        return dict(self._client_message.mex_headers())
+        return {}
 
     @property
     def recipient(self) -> str:

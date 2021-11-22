@@ -1,3 +1,4 @@
+import json
 from threading import Thread
 
 from awsmesh.entrypoint import build_forwarder_from_environment_variables
@@ -55,7 +56,6 @@ def test_mesh_inbox_sns_forwarder(e2e_test_context):
         TopicArn=topic_arn,
         Protocol="sqs",
         Endpoint=f"{sqs_arn}:{queue_name}",
-        Attributes={"RawMessageDelivery": "true"},
     )
 
     message_contents = a_string()
@@ -67,10 +67,8 @@ def test_mesh_inbox_sns_forwarder(e2e_test_context):
     try:
         forwarder.start()
         mesh.send_message(RECEIVING_MESH_MAILBOX, message_contents.encode("utf-8"))
-        messages = sqs.receive_message(
-            QueueUrl=queue_url, WaitTimeSeconds=10, MessageAttributeNames=["All"]
-        )["Messages"]
-        message_body = messages[0]["Body"]
+        messages = sqs.receive_message(QueueUrl=queue_url, WaitTimeSeconds=10)["Messages"]
+        message_body = json.loads(messages[0]["Body"])["Message"]
 
         assert message_body == message_contents
     finally:
