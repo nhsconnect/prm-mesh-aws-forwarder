@@ -14,10 +14,13 @@ class SNSUploader:
             message_content = message.read().decode("utf-8")
             message_headers = message.headers
 
-            sns_attributes = {
-                key: {"DataType": "String", "StringValue": value}
-                for key, value in message_headers.items()
-            }
+            message_id_key = "messageid"
+            sns_attributes = {}
+            if message_id_key in message_headers:
+                sns_attributes[message_id_key] = {
+                    "DataType": "String",
+                    "StringValue": message_headers[message_id_key],
+                }
 
             response = self._sns_client.publish(
                 TopicArn=self.topic_arn, Message=message_content, MessageAttributes=sns_attributes
