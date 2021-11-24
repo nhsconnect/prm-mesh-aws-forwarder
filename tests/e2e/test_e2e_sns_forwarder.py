@@ -74,7 +74,7 @@ def test_mesh_inbox_sns_forwarder(e2e_test_context):
         message_attributes = messages[0]["MessageAttributes"]
 
         assert message_body == message_contents
-        assert "messageid" in message_attributes
+        assert "meshMessageId" in message_attributes
     finally:
         forwarder.stop()
         e2e_test_context.unset_fake_aws_environment_vars()

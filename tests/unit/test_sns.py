@@ -73,7 +73,7 @@ def test_upload_forwards_just_the_messageid_mesh_message_header_as_sns_message_a
     mesh_message.headers = headers
 
     expected_sns_message_attributes = {
-        "messageid": {"DataType": "String", "StringValue": "the-message-id"}
+        "meshMessageId": {"DataType": "String", "StringValue": "the-message-id"}
     }
 
     uploader = SNSUploader(mock_sns_client, "test_topic")
