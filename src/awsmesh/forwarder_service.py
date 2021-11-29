@@ -69,5 +69,7 @@ def build_forwarder_service(
         verify=mesh_config.ca_cert_path,
     )
     inbox = MeshInbox(mesh)
-    forwarder = MeshToAwsForwarder(inbox, uploader, LoggingProbe(), disable_message_header_validation)
+    forwarder = MeshToAwsForwarder(
+        inbox, uploader, LoggingProbe(), disable_message_header_validation
+    )
     return MeshToAwsForwarderService(forwarder, poll_frequency_sec)
