@@ -37,7 +37,8 @@ def test_upload_records_message_id():
     forward_message_event.record_sns_message_id.assert_called_once_with(message_id)
 
 
-def test_upload_records_error_when_invalid_parameter_exception_raised():
+# flake8: noqa: E501
+def test_upload_error_is_raised_when_sns_client_raises_invalid_parameter_exception_which_covers_messages_that_are_too_large():
     mock_sns_client = MagicMock()
     forward_message_event = MagicMock()
     mesh_message = MagicMock()
@@ -47,9 +48,28 @@ def test_upload_records_error_when_invalid_parameter_exception_raised():
     )
 
     uploader = SNSUploader(mock_sns_client, "some_topic_arn")
-    uploader.upload(mesh_message, forward_message_event)
+    with pytest.raises(UploaderError):
+        uploader.upload(mesh_message, forward_message_event)
 
     forward_message_event.record_invalid_parameter_error.assert_called_once_with("boom")
+
+
+# flake8: noqa: E501
+def test_upload_records_error_when_sns_client_raises_invalid_parameter_exception_which_covers_messages_that_are_too_large():
+    mock_sns_client = MagicMock()
+    forward_message_event = MagicMock()
+    mesh_message = MagicMock()
+
+    mock_sns_client.publish.side_effect = build_client_error(
+        code="InvalidParameter", message="boom"
+    )
+
+    uploader = SNSUploader(mock_sns_client, "some_topic_arn")
+
+    with pytest.raises(UploaderError) as e:
+        uploader.upload(mesh_message, forward_message_event)
+
+    assert "boom" in str(e.value)
 
 
 def test_upload_error_raised_when_upload_raises_exception():

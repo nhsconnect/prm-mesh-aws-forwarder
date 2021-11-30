@@ -32,5 +32,4 @@ class SNSUploader:
                 upload_event_metadata.record_invalid_parameter_error(
                     error.response["Error"]["Message"]
                 )
-            else:
-                raise UploaderError(str(error))
+            raise UploaderError(str(error))

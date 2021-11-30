@@ -6,6 +6,7 @@
 build/
 dist/
 venv/
+.venv/
 .mypy_cache/
 *.pyc
 gp2gp_mesh_file_s3_forwarder.egg-info
