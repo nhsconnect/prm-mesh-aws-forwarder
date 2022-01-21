@@ -348,6 +348,12 @@ def test_returns_true_if_mailbox_is_empty():
     assert forwarder.is_mailbox_empty() is True
 
 
+def test_returns_true_if_mailbox_count_is_less_than_zero():
+    forwarder = build_forwarder(inbox_message_count=-1)
+
+    assert forwarder.is_mailbox_empty() is True
+
+
 def test_raises_retryable_exception_when_inbox_count_messages_raises_mesh_network_exception():
     forwarder = build_forwarder(count_error=mesh_client_error())
 

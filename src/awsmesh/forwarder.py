@@ -33,7 +33,7 @@ class MeshToAwsForwarder:
         try:
             message_count = self._inbox.count_messages()
             count_message_event.record_message_count(message_count)
-            return message_count == 0
+            return message_count <= 0
         except MeshClientNetworkError as e:
             count_message_event.record_mesh_client_network_error(e)
             raise RetryableException()
