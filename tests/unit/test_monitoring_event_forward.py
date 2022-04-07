@@ -5,6 +5,7 @@ from awsmesh.monitoring.error import (
     INVALID_MESH_HEADER_ERROR,
     MESH_CLIENT_NETWORK_ERROR,
     MISSING_MESH_HEADER_ERROR,
+    SNS_EMPTY_MESSAGE_ERROR,
     SNS_INVALID_PARAMETER_ERROR,
     UPLOADER_ERROR,
 )
@@ -78,6 +79,22 @@ def test_record_sns_invalid_parameter_error():
     mock_output.log_event.assert_called_with(
         FORWARD_MESSAGE_EVENT,
         {"error": SNS_INVALID_PARAMETER_ERROR, "errorMessage": error_message},
+        "error",
+    )
+
+
+def test_record_sns_empty_message_error():
+    mock_output = MagicMock()
+    empty_message = MagicMock()
+    empty_message.headers = {"bobs": "fullhouse"}
+
+    forward_message_event = ForwardMessageEvent(mock_output)
+    forward_message_event.record_sns_empty_message_error(empty_message)
+    forward_message_event.finish()
+
+    mock_output.log_event.assert_called_with(
+        FORWARD_MESSAGE_EVENT,
+        {"error": SNS_EMPTY_MESSAGE_ERROR, "messageHeaders": empty_message.headers},
         "error",
     )
 

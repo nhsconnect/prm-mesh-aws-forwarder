@@ -17,6 +17,9 @@ class UploadEventMetadata(Protocol):
     def record_invalid_parameter_error(self, error_message):
         ...
 
+    def record_empty_message_error(self, message):
+        ...
+
 
 class MessageUploader(Protocol):
     def upload(self, message: MeshMessage, upload_event_metadata: UploadEventMetadata):

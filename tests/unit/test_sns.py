@@ -37,8 +37,22 @@ def test_upload_records_message_id():
     forward_message_event.record_sns_message_id.assert_called_once_with(message_id)
 
 
+def test_upload__will_just_log_and_not_throw__if_there_is_no_message_body_to_upload_rather_than_upload__it_is_probably_an_error_report():
+    mock_sns_client = MagicMock()
+    empty_mesh_message = MagicMock()
+    empty_mesh_message.read.return_value = "".encode("utf-8")
+
+    forward_message_event = MagicMock()
+
+    uploader = SNSUploader(mock_sns_client, "some_topic")
+    uploader.upload(empty_mesh_message, forward_message_event)
+
+    mock_sns_client.publish.assert_not_called()
+    forward_message_event.record_empty_message_error.assert_called_once_with(empty_mesh_message)
+
+
 # flake8: noqa: E501
-def test_upload_error_is_raised_when_sns_client_raises_invalid_parameter_exception_which_covers_messages_that_are_too_large():
+def test_upload__records_error__when_sns_client_raises_invalid_parameter_exception__which_covers_messages_that_are_too_large():
     mock_sns_client = MagicMock()
     forward_message_event = MagicMock()
     mesh_message = MagicMock()
@@ -55,7 +69,7 @@ def test_upload_error_is_raised_when_sns_client_raises_invalid_parameter_excepti
 
 
 # flake8: noqa: E501
-def test_upload_records_error_when_sns_client_raises_invalid_parameter_exception_which_covers_messages_that_are_too_large():
+def test_upload__error_is_raised__when_sns_client_raises_invalid_parameter_exception__which_covers_messages_that_are_too_large():
     mock_sns_client = MagicMock()
     forward_message_event = MagicMock()
     mesh_message = MagicMock()

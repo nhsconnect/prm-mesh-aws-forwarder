@@ -2,6 +2,7 @@ from awsmesh.mesh import InvalidMeshHeader, MeshMessage, MissingMeshHeader
 from awsmesh.monitoring.error import (
     INVALID_MESH_HEADER_ERROR,
     MISSING_MESH_HEADER_ERROR,
+    SNS_EMPTY_MESSAGE_ERROR,
     SNS_INVALID_PARAMETER_ERROR,
 )
 from awsmesh.monitoring.event.base import BaseForwarderEvent
@@ -24,6 +25,11 @@ class ForwardMessageEvent(BaseForwarderEvent):
 
     def record_sns_message_id(self, sns_message_id):
         self._fields["snsMessageId"] = sns_message_id
+
+    def record_sns_empty_message_error(self, message: MeshMessage):
+        self._fields["error"] = SNS_EMPTY_MESSAGE_ERROR
+        self._fields["messageHeaders"] = message.headers
+        self._level = "error"
 
     def record_invalid_parameter_error(self, error_message):
         self._fields["error"] = SNS_INVALID_PARAMETER_ERROR
