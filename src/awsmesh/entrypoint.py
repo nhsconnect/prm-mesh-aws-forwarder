@@ -1,4 +1,5 @@
 import logging
+import urllib3
 from os import environ
 from os.path import join
 from signal import SIGINT, SIGTERM, signal
@@ -10,6 +11,8 @@ from awsmesh.forwarder_service import MeshConfig, build_forwarder_service
 from awsmesh.logging import JsonFormatter
 from awsmesh.message_destination_resolver import MessageDestinationConfig
 from awsmesh.secrets import SsmSecretManager
+
+urllib3.disable_warnings(urllib3.exceptions.SubjectAltNameWarning)
 
 
 def build_mesh_config_from_ssm(ssm, config) -> MeshConfig:
