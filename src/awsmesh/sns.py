@@ -7,6 +7,7 @@ from awsmesh.uploader import UploaderError, UploadEventMetadata
 
 logger = logging.getLogger(__name__)
 
+
 # flake8: noqa: C901
 class SNSUploader:
     def __init__(self, sns_client, topic_arn: str):
@@ -20,22 +21,13 @@ class SNSUploader:
                 upload_event_metadata.record_sns_empty_message_error(message)
                 return
 
-            message_headers = message.headers
-            message_id_key = "messageid"
             mesh_message_id_key = "meshMessageId"
-            sns_attributes = {}
-
-            if message_id_key in message_headers:
-                # check that we can just use message.id
-                message_id_from_headers = message_headers[message_id_key]
-                logger.info(
-                    f"message id: from headers {message_id_from_headers}, from .id {message.id}"
-                )
-
-                sns_attributes[mesh_message_id_key] = {
+            sns_attributes = {
+                mesh_message_id_key: {
                     "DataType": "String",
-                    "StringValue": message_id_from_headers,
+                    "StringValue": message.id,
                 }
+            }
 
             response = self._sns_client.publish(
                 TopicArn=self.topic_arn, Message=message_content, MessageAttributes=sns_attributes

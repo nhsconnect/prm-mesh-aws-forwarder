@@ -100,11 +100,10 @@ def test_upload_error_raised_when_upload_raises_exception():
     assert error_message in str(e.value)
 
 
-def test_upload_forwards_just_the_messageid_mesh_message_header_as_sns_message_attribute():
+def test_upload_forwards_just_the_messageid_mesh_message_as_sns_message_attribute():
     mock_sns_client = MagicMock()
     mesh_message = MagicMock()
-    headers = {"bob": "foo", "messageid": "the-message-id", "sue": "too"}
-    mesh_message.headers = headers
+    mesh_message.id = "the-message-id"
 
     expected_sns_message_attributes = {
         "meshMessageId": {"DataType": "String", "StringValue": "the-message-id"}
@@ -116,14 +115,3 @@ def test_upload_forwards_just_the_messageid_mesh_message_header_as_sns_message_a
     mock_sns_client.publish.assert_called_once_with(
         TopicArn=ANY, Message=ANY, MessageAttributes=expected_sns_message_attributes
     )
-
-
-def test_upload_works_if_message_headers_do_not_include_a_messageid():
-    mock_sns_client = MagicMock()
-    mesh_message = MagicMock()
-    mesh_message.headers = {}
-
-    uploader = SNSUploader(mock_sns_client, "test_topic")
-    uploader.upload(mesh_message, MagicMock())
-
-    mock_sns_client.publish.assert_called_once_with(TopicArn=ANY, Message=ANY, MessageAttributes={})
