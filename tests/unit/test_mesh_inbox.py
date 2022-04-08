@@ -13,44 +13,84 @@ from tests.builders.mesh import (
 )
 
 
-def test_returns_messages():
+def test_mailbox_list_messages_returns_list_of_message_ids():
     message_ids = [a_string(), a_string(), a_string()]
-    client_messages = [mock_client_message(message_id=m_id) for m_id in message_ids]
-    mesh_inbox = mock_mesh_inbox(client_messages=client_messages)
+    mesh_inbox = mock_mesh_inbox(client_msg_ids=message_ids)
 
-    actual_messages_ids = [message.id for message in mesh_inbox.read_messages()]
-
-    assert actual_messages_ids == message_ids
+    assert mesh_inbox.list_message_ids() == message_ids
 
 
-def test_raises_network_error_when_iterating_all_messages_raises_an_http_error():
-    def mock_iterate_all_messages():
+def test_raises_network_error_when_list_messages_has_http_error():
+    def mock_list_messages():
         raise mesh_client_http_error()
-        yield mock_client_message()
 
     client_inbox = MagicMock()
-    client_inbox.iterate_all_messages = mock_iterate_all_messages
+    client_inbox.list_messages = mock_list_messages
 
     mesh_inbox = MeshInbox(client_inbox)
 
     with pytest.raises(MeshClientNetworkError) as e:
-        mesh_inbox.read_messages()
+        mesh_inbox.list_message_ids()
 
     assert str(e.value) == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
 
 
-def test_raises_network_error_when_iterating_all_messages_raises_a_connection_error():
-    def mock_iterate_all_messages():
+def test_raises_network_error_when_list_messages_raises_a_connection_error():
+    def mock_list_messages():
         raise mesh_client_connection_error("an error")
-        yield mock_client_message()
 
     client_inbox = MagicMock()
-    client_inbox.iterate_all_messages = mock_iterate_all_messages
+    client_inbox.list_messages = mock_list_messages
 
     mesh_inbox = MeshInbox(client_inbox)
 
     with pytest.raises(MeshClientNetworkError) as e:
-        mesh_inbox.read_messages()
+        mesh_inbox.list_message_ids()
+
+    assert str(e.value) == (
+        f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"
+        " caused by: an error"
+    )
+
+
+def test_mailbox_retrieve_message_returns_mesh_message():
+    message_id = a_string()
+    mock_mesh_client = MagicMock()
+    mock_mesh_client.retrieve_message.return_value = mock_client_message(message_id=message_id)
+    mesh_inbox = MeshInbox(mock_mesh_client)
+
+    retrieved_message = mesh_inbox.retrieve_message(message_id)
+
+    assert retrieved_message.id == message_id
+    mock_mesh_client.retrieve_message.assert_called_once_with(message_id)
+
+
+def test_raises_network_error_when_retrieve_message_has_http_error():
+    def mock_retrieve_message(message_id):
+        raise mesh_client_http_error()
+
+    client_inbox = MagicMock()
+    client_inbox.retrieve_message = mock_retrieve_message
+
+    mesh_inbox = MeshInbox(client_inbox)
+
+    with pytest.raises(MeshClientNetworkError) as e:
+        mesh_inbox.retrieve_message(a_string())
+
+    assert str(e.value) == f"400 HTTP Error: Bad request for url: {TEST_INBOX_URL}"
+
+
+def test_raises_network_error_when_retrieve_message_raises_a_connection_error():
+    def mock_retrieve_message(message_id):
+        raise mesh_client_connection_error("an error")
+
+    client_inbox = MagicMock()
+    client_inbox.retrieve_message = mock_retrieve_message
+
+    mesh_inbox = MeshInbox(client_inbox)
+
+    with pytest.raises(MeshClientNetworkError) as e:
+        mesh_inbox.retrieve_message(a_string())
 
     assert str(e.value) == (
         f"ConnectionError received when attempting to connect to: {TEST_INBOX_URL}"

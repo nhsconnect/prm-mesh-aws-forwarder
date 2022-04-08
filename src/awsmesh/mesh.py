@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Callable, List
+from typing import List
 
 from mesh_client import MeshClient, Message
 from requests import ConnectionError, HTTPError
@@ -12,7 +12,7 @@ MESH_STATUS_SUCCESS = "SUCCESS"
 logger = logging.getLogger(__name__)
 
 
-def _wrap_http_errors(func: Callable[[Any], Any]):
+def _wrap_http_errors(func):
     def wrapper_function(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -82,10 +82,13 @@ class MeshInbox:
         self._client = client
 
     @_wrap_http_errors
-    def read_messages(self) -> List[MeshMessage]:
-        return [
-            MeshMessage(client_message) for client_message in self._client.iterate_all_messages()
-        ]
+    def list_message_ids(self) -> List[str]:
+        return self._client.list_messages()
+
+    @_wrap_http_errors
+    def retrieve_message(self, message_id) -> MeshMessage:
+        client_message = self._client.retrieve_message(message_id)
+        return MeshMessage(client_message)
 
     @_wrap_http_errors
     def count_messages(self) -> int:

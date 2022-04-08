@@ -25,8 +25,8 @@ class MeshToAwsForwarder:
         self._disable_message_header_validation = disable_message_header_validation
 
     def forward_messages(self):
-        for message in self._poll_messages():
-            self._process_message(message)
+        for message_id in self._poll_messages():
+            self._process_message(message_id)
 
     def is_mailbox_empty(self):
         count_message_event = self._probe.new_count_messages_event()
@@ -43,7 +43,7 @@ class MeshToAwsForwarder:
     def _poll_messages(self):
         poll_inbox_event = self._probe.new_poll_inbox_event()
         try:
-            messages = self._inbox.read_messages()
+            messages = self._inbox.list_message_ids()
             poll_inbox_event.record_message_batch_count(len(messages))
             return messages
         except MeshClientNetworkError as e:
@@ -53,9 +53,10 @@ class MeshToAwsForwarder:
             poll_inbox_event.finish()
 
     # flake8: noqa: C901
-    def _process_message(self, message):
+    def _process_message(self, message_id):
         forward_message_event = self._probe.new_forward_message_event()
         try:
+            message = self._inbox.retrieve_message(message_id)
             forward_message_event.record_message_metadata(message)
             if not self._disable_message_header_validation:
                 message.validate()
