@@ -17,7 +17,7 @@ class SNSUploader:
         try:
             message_content = message.read().decode("utf-8")
             if message_content == "":
-                upload_event_metadata.record_empty_message_error(message)
+                upload_event_metadata.record_sns_empty_message_error(message)
                 return
 
             message_headers = message.headers
@@ -29,7 +29,7 @@ class SNSUploader:
                 # check that we can just use message.id
                 message_id_from_headers = message_headers[message_id_key]
                 logger.info(
-                    "message id: from headers %s, from .id %s", message_id_from_headers, message.id
+                    f"message id: from headers {message_id_from_headers}, from .id {message.id}"
                 )
 
                 sns_attributes[mesh_message_id_key] = {

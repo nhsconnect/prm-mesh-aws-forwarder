@@ -48,7 +48,7 @@ def test_upload__will_just_log_and_not_throw__if_there_is_no_message_body_to_upl
     uploader.upload(empty_mesh_message, forward_message_event)
 
     mock_sns_client.publish.assert_not_called()
-    forward_message_event.record_empty_message_error.assert_called_once_with(empty_mesh_message)
+    forward_message_event.record_sns_empty_message_error.assert_called_once_with(empty_mesh_message)
 
 
 # flake8: noqa: E501

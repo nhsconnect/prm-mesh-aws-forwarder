@@ -17,7 +17,7 @@ class UploadEventMetadata(Protocol):
     def record_invalid_parameter_error(self, error_message):
         ...
 
-    def record_empty_message_error(self, message):
+    def record_sns_empty_message_error(self, message):
         ...
 
 
