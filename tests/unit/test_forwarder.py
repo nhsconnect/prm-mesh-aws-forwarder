@@ -1,7 +1,7 @@
+import logging
 from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
-import logging
 import pytest
 
 from awsmesh.forwarder import RetryableException
@@ -340,6 +340,7 @@ def test_that_when_a_network_error_occurs_on_retrieving_a_message_it_continues_t
 
     mock_uploader.upload.assert_called_once_with(good_message, mock.ANY)
 
+
 def test_that_when_a_network_error_occurs_on_retrieving_multiple_messages_it_logs_them():
     mock_uploader = MagicMock()
     logger = logging.getLogger("awsmesh.forwarder")
@@ -358,7 +359,9 @@ def test_that_when_a_network_error_occurs_on_retrieving_multiple_messages_it_log
         pass
 
     mock_uploader.upload.assert_called_once_with(good_message, mock.ANY)
-    mock_info.assert_called_once_with("Raising single retryable exception, actually caught 2 message exception(s)")
+    mock_info.assert_called_once_with(
+        "Raising single retryable exception, actually caught 2 message exception(s)"
+    )
 
 
 # flake8: noqa: E501

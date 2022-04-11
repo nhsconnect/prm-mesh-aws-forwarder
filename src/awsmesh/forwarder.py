@@ -33,7 +33,9 @@ class MeshToAwsForwarder:
                 message_exceptions.append(e)
 
         if len(message_exceptions) > 0:
-            logger.info(f"Raising single retryable exception, actually caught {len(message_exceptions)} message exception(s)")
+            logger.info(
+                f"Raising single retryable exception, actually caught {len(message_exceptions)} message exception(s)"
+            )
             raise message_exceptions[0]
 
     def is_mailbox_empty(self):
