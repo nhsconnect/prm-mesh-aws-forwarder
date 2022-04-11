@@ -1,10 +1,10 @@
 import logging
-import urllib3
 from os import environ
 from os.path import join
 from signal import SIGINT, SIGTERM, signal
 
 import boto3
+import urllib3
 
 from awsmesh.config import ForwarderConfig
 from awsmesh.forwarder_service import MeshConfig, build_forwarder_service

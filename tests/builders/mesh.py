@@ -92,5 +92,5 @@ def mesh_client_connection_error(message):
     return ConnectionError(message, request=request)
 
 
-def mesh_client_error(error_message="A message"):
+def mesh_client_network_error(error_message="A message"):
     return MeshClientNetworkError(error_message)

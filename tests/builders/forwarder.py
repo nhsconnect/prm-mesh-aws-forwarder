@@ -11,10 +11,10 @@ def build_forwarder(**kwargs):
     disable_message_header_validation = kwargs.get("disable_message_header_validation", False)
     mock_uploader.upload.side_effect = kwargs.get("uploader_error", None)
     mock_mesh_inbox.list_message_ids.return_value = [
-        m_id for m_id in kwargs.get("incoming_messages", [])
+        m_id for m_id in kwargs.get("list_message_ids", [])
     ]
-    mock_mesh_inbox.list_message_ids.side_effect = kwargs.get("read_error", None)
-    mock_mesh_inbox.retrieve_message.side_effect = kwargs.get("incoming_messages", [])
+    mock_mesh_inbox.list_message_ids.side_effect = kwargs.get("list_message_ids_error", None)
+    mock_mesh_inbox.retrieve_message.side_effect = kwargs.get("retrieve_message", [])
     mock_mesh_inbox.count_messages.side_effect = kwargs.get("count_error", None)
     mock_mesh_inbox.count_messages.return_value = kwargs.get("inbox_message_count", 0)
 

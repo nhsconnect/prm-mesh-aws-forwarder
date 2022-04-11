@@ -25,7 +25,7 @@ class MeshToAwsForwarder:
         self._disable_message_header_validation = disable_message_header_validation
 
     def forward_messages(self):
-        for message_id in self._poll_messages():
+        for message_id in self._poll_message_ids():
             self._process_message(message_id)
 
     def is_mailbox_empty(self):
@@ -40,7 +40,7 @@ class MeshToAwsForwarder:
         finally:
             count_message_event.finish()
 
-    def _poll_messages(self):
+    def _poll_message_ids(self):
         poll_inbox_event = self._probe.new_poll_inbox_event()
         try:
             messages = self._inbox.list_message_ids()
