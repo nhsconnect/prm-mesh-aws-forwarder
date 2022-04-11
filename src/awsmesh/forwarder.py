@@ -25,8 +25,16 @@ class MeshToAwsForwarder:
         self._disable_message_header_validation = disable_message_header_validation
 
     def forward_messages(self):
+        message_exceptions = []
         for message_id in self._poll_message_ids():
-            self._process_message(message_id)
+            try:
+                self._process_message(message_id)
+            except RetryableException as e:
+                message_exceptions.append(e)
+
+        if len(message_exceptions) > 0:
+            # logging other exceptions??
+            raise message_exceptions[0]
 
     def is_mailbox_empty(self):
         count_message_event = self._probe.new_count_messages_event()

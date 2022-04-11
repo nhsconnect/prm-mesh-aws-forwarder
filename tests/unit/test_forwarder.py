@@ -321,6 +321,44 @@ def test_raises_retryable_exception_when_inbox_receive_message_raises_mesh_netwo
         forwarder.forward_messages()
 
 
+# flake8: noqa: E501
+def test_that_when_a_network_error_occurs_on_retrieving_a_message_it_continues_to_download_other_messages():
+    mock_uploader = MagicMock()
+
+    good_message = mock_mesh_message()
+    forwarder = build_forwarder(
+        list_message_ids=["bad_message_id", good_message.id],
+        retrieve_message=[mesh_client_network_error(), good_message],
+        uploader=mock_uploader,
+    )
+
+    try:
+        forwarder.forward_messages()
+    except Exception:
+        pass
+
+    mock_uploader.upload.assert_called_once_with(good_message, mock.ANY)
+
+
+# flake8: noqa: E501
+def test_that_when_a_non_network_error_occurs_on_retrieving_a_message_it_is_not_caught_and_processing_stops():
+    mock_uploader = MagicMock()
+
+    good_message = mock_mesh_message()
+    non_network_exception = Exception("some funky unexpected occurrence on retrieving message")
+    forwarder = build_forwarder(
+        list_message_ids=["bad_message_id", good_message.id],
+        retrieve_message=[non_network_exception, good_message],
+        uploader=mock_uploader,
+    )
+
+    with pytest.raises(Exception) as raised_e_info:
+        forwarder.forward_messages()
+
+    assert raised_e_info.value == non_network_exception
+    assert mock_uploader.upload.call_count == 0
+
+
 def test_raises_retryable_exception_when_mesh_message_ack_raises_mesh_network_exception():
     mock_message = mock_mesh_message(acknowledge_error=mesh_client_network_error())
     forwarder = build_forwarder(list_message_ids=[mock_message.id], retrieve_message=[mock_message])
