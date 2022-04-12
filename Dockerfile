@@ -7,7 +7,10 @@ RUN addgroup --system mesh && adduser --ingroup mesh --system mesh
 
 COPY . /mesh-forwarder
 
-RUN cd /mesh-forwarder && python setup.py install
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN cd /mesh-forwarder && pip install -r requirements.txt
 
 RUN chown -R mesh:mesh /mesh-forwarder
 
