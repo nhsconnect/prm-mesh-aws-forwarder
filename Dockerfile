@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.9.6-alpine
 
 ENV POLL_FREQUENCY=60
 ENV FORWARDER_HOME=/mesh-forwarder
