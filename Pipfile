@@ -7,6 +7,7 @@ name = "pypi"
 mesh-inbox-s3-forwarder = {editable = true, path = "."}
 
 [dev-packages]
+werkzeug = "~=2.1.0"
 moto = {version = "~=2.2", extras = ["server"]}
 pytest-cov = "~=2.12"
 pytest = "~=6.2"
